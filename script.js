@@ -156,7 +156,7 @@ function showScreen(screen) {
 async function startMusic() {
   try {
     audio.volume = 0.5;
-    volumeSlider.value = 20;
+    volumeSlider.value = 15;
     await audio.play();
     playing = true;
     playToggle.textContent = '❚❚';
@@ -433,7 +433,7 @@ async function fetchDiscordPresence() {
 
     presenceEls.displayName.textContent = user.global_name || user.display_name || 'Takeshi';
     presenceEls.username.textContent = user.username || 'takeshi';
-    presenceEls.customStatusLine.textContent = customStatusText || 'Không có custom status';
+    presenceEls.customStatusLine.textContent = customStatusText || '...';
     presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>${statusLabel}${clientText ? ` - ${clientText}` : ''}`;
     presenceEls.updated.textContent = new Date().toLocaleTimeString('vi-VN', { hour12: false });
     if (avatarUrl) presenceEls.avatar.src = avatarUrl;
