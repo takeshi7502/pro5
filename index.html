@@ -37,7 +37,7 @@
             <span>C:\Users\Takeshi&gt;</span>
             <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" aria-label="CMD command input" />
           </form>
-          <button id="enter-console-btn" class="cmd-continue">Press [Enter] to join world</button>
+          <button id="enter-console-btn" class="cmd-continue">Join World</button>
         </div>
       </div>
     </section>
@@ -85,7 +85,7 @@
 
         <section class="meta-grid" aria-label="Thông tin realtime Discord">
           <div><span>Spotify</span><strong id="spotify-status">Chưa phát hiện</strong></div>
-          <div><span>Huy hiệu</span><strong id="public-flags">Đang tải</strong></div>
+          <div><span>Huy hiệu</span><strong id="public-flags" class="badge-list">Đang tải</strong></div>
         </section>
 
         <section class="about-card">
@@ -184,10 +184,8 @@
 
   <aside id="music-player" class="music-player glass-panel hidden" aria-label="Trình phát nhạc">
     <button id="play-toggle" class="play-btn" type="button" aria-label="Phát hoặc tạm dừng">▶</button>
-    <div class="player-art"></div>
     <div class="track-meta">
       <strong id="track-title">Weathering With You Lofi</strong>
-      <span>Takeshi playlist</span>
       <div class="progress"><span id="progress-bar"></span></div>
     </div>
     <div id="volume-control" class="volume-control" aria-label="Âm lượng nhạc">

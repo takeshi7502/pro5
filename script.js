@@ -62,6 +62,22 @@ const activityTypes = {
   5: { label: 'Đang thi đấu', icon: '⚔' },
 };
 
+const discordBadges = [
+  { bit: 1 << 0, icon: '🛡️', label: 'Discord Staff' },
+  { bit: 1 << 1, icon: '🤝', label: 'Partnered Server Owner' },
+  { bit: 1 << 2, icon: '🎤', label: 'HypeSquad Events' },
+  { bit: 1 << 3, icon: '🐞', label: 'Bug Hunter Level 1' },
+  { bit: 1 << 6, icon: '🦁', label: 'HypeSquad Bravery' },
+  { bit: 1 << 7, icon: '💡', label: 'HypeSquad Brilliance' },
+  { bit: 1 << 8, icon: '⚖️', label: 'HypeSquad Balance' },
+  { bit: 1 << 9, icon: '✨', label: 'Early Supporter' },
+  { bit: 1 << 14, icon: '🐞', label: 'Bug Hunter Level 2' },
+  { bit: 1 << 16, icon: '🤖', label: 'Verified Bot' },
+  { bit: 1 << 17, icon: '👨‍💻', label: 'Early Verified Bot Developer' },
+  { bit: 1 << 18, icon: '🛡', label: 'Discord Certified Moderator' },
+  { bit: 1 << 22, icon: '🌱', label: 'Active Developer' },
+];
+
 const introLines = [
   'C:\\Users\\Takeshi> whoami',
   'takeshi.dev',
@@ -104,7 +120,7 @@ function renderCmdTabs() {
   cmdTabs.innerHTML = cmdTabsState.map((tab) => `
     <button class="cmd-tab ${tab.id === activeTabId ? 'active-tab' : ''}" type="button" data-tab-id="${tab.id}" role="tab" aria-selected="${tab.id === activeTabId}">
       <span class="cmd-tab-title">${tab.title}</span>
-      ${cmdTabsState.length > 1 ? '<span class="cmd-tab-close" data-close-tab>×</span>' : ''}
+      ${cmdTabsState.length > 1 && !tab.boot ? '<span class="cmd-tab-close" data-close-tab>×</span>' : ''}
     </button>
   `).join('');
 }
@@ -241,7 +257,7 @@ function openCmdTab() {
 function closeCmdTab(tabId) {
   if (cmdTabsState.length === 1) return;
   const index = cmdTabsState.findIndex((tab) => tab.id === tabId);
-  if (index === -1) return;
+  if (index === -1 || cmdTabsState[index].boot) return;
   cmdTabsState.splice(index, 1);
   if (activeTabId === tabId) activeTabId = cmdTabsState[Math.max(0, index - 1)].id;
   renderCmd();
@@ -391,11 +407,27 @@ function updateActivityCard(activity) {
   presenceEls.activityTime.textContent = activity.time;
 }
 
-function updateMetaFields(data, user) {
+const staticDiscordBadges = [
+  { name: 'HypeSquad Lỗi Lạc', icon: './data/badges/hypesquad-brilliance.svg' },
+  { name: 'Nhà Phát Triển Tích Cực', icon: './data/badges/active-developer.svg' },
+  { name: 'Đăng ký từ 8 thg 12, 2022', icon: './data/badges/nitro-new.svg', nitro: true },
+  { name: 'Nitro Boost', icon: './data/badges/boost-6-month.svg', nitro: true },
+  { name: 'takeshi#7502', icon: './data/badges/legacy-username.svg' },
+];
+
+function renderDiscordBadges() {
+  presenceEls.publicFlags.innerHTML = staticDiscordBadges.map((badge) => `
+    <span class="discord-badge ${badge.nitro ? 'nitro' : ''}" data-tooltip="${badge.name}" aria-label="${badge.name}">
+      <img src="${badge.icon}" alt="${badge.name}">
+    </span>
+  `).join('');
+}
+
+function updateMetaFields(data) {
   presenceEls.spotifyStatus.textContent = data.listening_to_spotify && data.spotify
     ? `${data.spotify.song || 'Spotify'} · ${data.spotify.artist || 'Unknown'}`
     : 'Chưa phát hiện';
-  presenceEls.publicFlags.textContent = user.public_flags ? `Flags ${user.public_flags}` : 'Không công khai';
+  renderDiscordBadges();
 }
 
 function setLocalDecoration() {
@@ -458,6 +490,7 @@ async function fetchDiscordPresence() {
     presenceEls.customStatusLine.textContent = 'Không rõ';
     presenceEls.updated.textContent = 'offline';
     presenceEls.spotifyStatus.textContent = 'Không rõ';
+    presenceEls.publicFlags.innerHTML = '<span class="discord-badge empty">Không rõ</span>';
   }
 }
 fetchDiscordPresence();
@@ -678,19 +711,28 @@ function buildUnityRichText() {
 
 function showColorPage() {
   document.body.classList.add('color-page-active');
+  colorTool.profile.classList.remove('slide-to-home');
+  colorTool.profile.classList.add('slide-to-color');
+  colorTool.page.classList.remove('hidden', 'leaving');
   colorTool.profile.classList.add('color-mode');
-  colorTool.page.classList.remove('hidden');
   player.classList.add('hidden');
   pauseMusic();
   buildUnityRichText();
+  setTimeout(() => colorTool.profile.classList.remove('slide-to-color'), 760);
 }
 
 function hideColorPage() {
-  document.body.classList.remove('color-page-active');
-  colorTool.profile.classList.remove('color-mode');
-  colorTool.page.classList.add('hidden');
-  player.classList.remove('hidden');
-  startMusic();
+  colorTool.page.classList.add('leaving');
+  colorTool.profile.classList.remove('slide-to-color');
+  colorTool.profile.classList.add('slide-to-home');
+  setTimeout(() => {
+    document.body.classList.remove('color-page-active');
+    colorTool.profile.classList.remove('color-mode', 'slide-to-home');
+    colorTool.page.classList.add('hidden');
+    colorTool.page.classList.remove('leaving');
+    player.classList.remove('hidden');
+    startMusic();
+  }, 560);
 }
 
 if (colorTool.open) colorTool.open.addEventListener('click', (event) => { event.preventDefault(); showColorPage(); });
