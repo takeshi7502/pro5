@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Takeshi | Hồ sơ cá nhân</title>
+  <meta name="description"
+    content="Hồ sơ cá nhân Takeshi với phong cách cyber Discord nhẹ, trạng thái Discord realtime, avatar decor và trình phát nhạc." />
+  <meta name="theme-color" content="#070a15" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="https://cdn.discordapp.com/emojis/1107673511402676365.webp" />
+  
+</head>
+
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <main id="app-root">
+    <section id="terminal-screen" class="screen terminal-screen active" aria-label="Windows 11 command prompt intro">
+      <div class="cmd-window">
+        <div class="cmd-titlebar">
+          <div id="cmd-tabs" class="cmd-tabs" role="tablist" aria-label="CMD tabs"></div>
+          <button id="cmd-new-tab" class="cmd-plus" type="button" aria-label="Mở tab CMD mới">+</button>
+          <div class="cmd-controls" aria-hidden="true"><span>—</span><span>□</span><span>×</span></div>
+        </div>
+        <div class="cmd-body">
+          <div id="cmd-log" class="cmd-log" aria-live="polite"></div>
+          <form id="cmd-form" class="cmd-prompt-line" autocomplete="off">
+            <span>C:\Users\Takeshi&gt;</span>
+            <input id="cmd-input" type="text" autocomplete="off" spellcheck="false" aria-label="CMD command input" />
+          </form>
+          <button id="enter-console-btn" class="cmd-continue">Press [Enter] to join world</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="profile-screen" class="screen profile-screen" aria-label="Trang hồ sơ chính">
+      <article class="profile-console glass-panel">
+        <div class="profile-banner">
+          <img id="banner-image" src="https://i.pinimg.com/originals/20/cc/a0/20cca0b04e912510dbfd30b4608972b6.gif"
+            alt="Ảnh bìa hồ sơ" />
+          <div class="banner-glow"></div>
+        </div>
+
+        <header class="profile-header">
+          <div class="avatar-wrap">
+            <img id="avatar-image" class="avatar-image" src="" alt="Ảnh đại diện Discord" />
+            <div id="avatar-fallback" class="avatar-fallback">T</div>
+            <img id="avatar-decoration" class="avatar-decoration" src="./data/decoration/anime-nani.png"
+              alt="Trang trí avatar" />
+            <span id="status-orb" class="status-orb offline" aria-label="Trạng thái Discord"></span>
+          </div>
+
+          <div class="identity-block">
+            <h1 id="display-name">Takeshi</h1>
+            <p class="username">@<span id="username">takeshi</span></p>
+          </div>
+        </header>
+
+        <section class="presence-card" aria-labelledby="presence-title">
+          <div>
+            <h2 id="presence-title">Trạng thái: <span id="custom-status-line">Đang tải...</span></h2>
+            <p id="status-text"><span class="inline-dot"></span>Đang kết nối Discord...</p>
+          </div>
+          <span id="last-updated" class="sync-pill">đang đồng bộ</span>
+        </section>
+
+        <section id="activity-card" class="activity-card hidden" aria-labelledby="activity-title">
+          <div id="activity-icon" class="activity-icon">✦</div>
+          <div>
+            <h2 id="activity-title">Hoạt động</h2>
+            <p id="activity-name" class="handle">Không có hoạt động</p>
+            <p id="activity-detail">Khi có game, Spotify hoặc app đang chạy thì sẽ hiện ở đây.</p>
+            <p id="activity-time" class="activity-time"></p>
+          </div>
+        </section>
+
+        <section class="meta-grid" aria-label="Thông tin realtime Discord">
+          <div><span>Spotify</span><strong id="spotify-status">Chưa phát hiện</strong></div>
+          <div><span>Huy hiệu</span><strong id="public-flags">Đang tải</strong></div>
+        </section>
+
+        <section class="about-card">
+          <h2>Giới thiệu</h2>
+          <p>Một góc hồ sơ nhỏ gọn của Takeshi, lấy cảm hứng nhẹ từ Discord nhưng vẫn giữ phong cách anime riêng: tối,
+            gọn, mượt và có chiều sâu.</p>
+          <div class="tags" aria-label="Thẻ hồ sơ">
+            <span>Anime Suki</span>
+            <span>Gamer</span>
+            <span>Developer</span>
+            <span>Music Lofi</span>
+            <span>Cheater</span>
+          </div>
+        </section>
+
+        <nav class="social-row" aria-label="Liên kết mạng xã hội">
+          <a id="discord-link" href="https://discord.gg/eGkwfAQKMF" target="_blank" rel="noopener noreferrer" aria-label="Discord" title="Discord">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.32 4.37A19.8 19.8 0 0 0 15.36 2l-.24.44c1.8.55 2.64 1.34 2.64 1.34a16.5 16.5 0 0 0-5.02-1.55 17.1 17.1 0 0 0-4.24.04c-.13 0-.25.03-.38.05-.75.07-2.56.34-4.84 1.36 0 0 .87-.83 2.78-1.38L5.9 2A19.7 19.7 0 0 0 .94 4.42S-1.6 8.1-1.6 12.7c0 0 1.47 2.52 5.34 2.65 0 0 .65-.78 1.18-1.45-2.24-.67-3.09-2.08-3.09-2.08s.18.13.5.31c.02.02.05.03.08.05.04.03.08.05.12.07.44.25.88.45 1.29.6.72.28 1.58.56 2.59.75 1.33.25 2.9.34 4.6.02.83-.15 1.68-.4 2.57-.75.62-.24 1.31-.58 2.03-1.05 0 0-.88 1.44-3.2 2.1.53.66 1.15 1.42 1.15 1.42 3.88-.13 5.36-2.65 5.36-2.65 0-4.6-2.6-8.33-2.6-8.33ZM7.3 11.62c-.98 0-1.78-.86-1.78-1.92 0-1.06.78-1.92 1.78-1.92s1.8.86 1.78 1.92c0 1.06-.79 1.92-1.78 1.92Zm6.38 0c-.98 0-1.78-.86-1.78-1.92 0-1.06.79-1.92 1.78-1.92 1 0 1.8.86 1.78 1.92 0 1.06-.78 1.92-1.78 1.92Z"/></svg>
+          </a>
+          <a id="youtube-link" href="http://youtube.com/@takeshi7502" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.52 3.58 12 3.58 12 3.58s-7.52 0-9.4.5A3 3 0 0 0 .5 6.2 31.2 31.2 0 0 0 0 12a31.2 31.2 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.12c1.88.5 9.4.5 9.4.5s7.52 0 9.4-.5a3 3 0 0 0 2.1-2.12A31.2 31.2 0 0 0 24 12a31.2 31.2 0 0 0-.5-5.8ZM9.6 15.55v-7.1L15.85 12 9.6 15.55Z"/></svg>
+          </a>
+          <a id="x-link" href="http://x.com/takeshi7502" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2h3.68l-8.04 9.18L24 22h-7.4l-5.8-7.58L4.17 22H.48l8.6-9.83L0 2h7.6l5.24 6.93L18.9 2Zm-1.3 18.1h2.04L6.5 3.8H4.31L17.6 20.1Z"/></svg>
+          </a>
+          <a id="github-link" href="https://github.com/takeshi7502" target="_blank" rel="noopener noreferrer" aria-label="Github" title="Github">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.38c.6.1.82-.26.82-.58v-2.04c-3.34.73-4.04-1.41-4.04-1.41-.55-1.38-1.34-1.75-1.34-1.75-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.53.12-3.18 0 0 1.01-.32 3.3 1.23a11.4 11.4 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5Z"/></svg>
+          </a>
+        </nav>
+
+        <footer class="profile-footer">
+          <a id="page-one-link" href="#">Trang 1</a>
+          <a id="page-two-link" href="#">Trang 2</a>
+          <a id="mal-link" href="#">MyAnimeList</a>
+        </footer>
+      </article>
+    </section>
+  </main>
+
+  <aside id="music-player" class="music-player glass-panel hidden" aria-label="Trình phát nhạc">
+    <button id="play-toggle" class="play-btn" type="button" aria-label="Phát hoặc tạm dừng">▶</button>
+    <div class="player-art"></div>
+    <div class="track-meta">
+      <strong id="track-title">Weathering With You Lofi</strong>
+      <span>Takeshi playlist</span>
+      <div class="progress"><span id="progress-bar"></span></div>
+    </div>
+    <div id="volume-control" class="volume-control" aria-label="Âm lượng nhạc">
+      <button id="volume-toggle" class="volume-toggle" type="button" aria-label="Mở chỉnh âm lượng">🔊</button>
+      <input id="volume-slider" type="range" min="0" max="100" value="50" aria-label="Chỉnh âm lượng nhạc" />
+    </div>
+    <div class="visualizer" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <audio id="audio-player" src="./data/music/Weathering_with_you_Lofi.mp3" preload="auto" loop></audio>
+  </aside>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
