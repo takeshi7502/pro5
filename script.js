@@ -87,7 +87,7 @@ let introTimer;
 const cmdTabsState = [
   {
     id: 'boot',
-    title: 'Command Prompt',
+    title: 'cmd',
     log: 'Microsoft Windows [Version 11.0.22631.0000]\n(c) Microsoft Corporation. All rights reserved.\n\n',
     input: '',
     boot: true,
@@ -150,6 +150,7 @@ typeIntro();
 function showScreen(screen) {
   [terminalScreen, profileScreen].forEach((item) => item.classList.remove('active'));
   screen.classList.add('active');
+  document.body.classList.toggle('terminal-active', screen === terminalScreen);
   player.classList.toggle('hidden', screen !== profileScreen);
 }
 
@@ -215,7 +216,7 @@ function openCmdTab() {
   ].join('\n');
   const tab = {
     id,
-    title: 'Command Prompt 2',
+    title: 'cmd 2',
     log: staticHeader,
     input: '',
     boot: false,
