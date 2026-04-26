@@ -668,6 +668,40 @@ const colorTool = {
   copy: document.getElementById('tc-copy'),
 };
 
+const BOT_STATUS_ENDPOINTS = [
+  'https://musicbot-api.takeshi.dev/api/public-status',
+  'http://localhost:3000/api/public-status',
+  'http://127.0.0.1:3000/api/public-status',
+  'http://localhost:20128/api/public-status',
+  'http://127.0.0.1:20128/api/public-status',
+];
+const BOT_STATUS_REFRESH_MS = 15000;
+let botStatusTimer = null;
+let activeBotStatusApi = null;
+
+const botPage = {
+  page: document.getElementById('bot-page'),
+  open: document.getElementById('page-two-link'),
+  back: document.getElementById('bot-back'),
+  avatar: document.getElementById('bot-avatar'),
+  statusDot: document.getElementById('bot-status-dot'),
+  statusText: document.getElementById('bot-status-text'),
+  pageTitle: document.getElementById('bot-page-title'),
+  name: document.getElementById('bot-display-name'),
+  customStatus: document.getElementById('bot-custom-status'),
+  hero: document.querySelector('.bot-hero'),
+  invite: document.getElementById('bot-invite-link'),
+  updatedAt: document.getElementById('bot-updated-at'),
+  ping: document.getElementById('bot-ping'),
+  servers: document.getElementById('bot-servers'),
+  playing: document.getElementById('bot-playing'),
+  connected: document.getElementById('bot-connected'),
+  runtime: document.getElementById('bot-runtime'),
+  lavalink: document.getElementById('bot-lavalink'),
+};
+
+let activeInnerPage = null;
+
 function hexToRgb(hex) {
   const value = hex.replace('#', '');
   return [0, 2, 4].map((index) => parseInt(value.slice(index, index + 2), 16));
@@ -771,40 +805,167 @@ function buildUnityRichText() {
   colorTool.output.value = rich;
 }
 
-function showColorPage() {
+function showInnerPage(page, afterShow) {
+  if (!page) return;
   resetCardPointer();
-  colorTool.page.style.setProperty('--tilt-x', '0deg');
-  colorTool.page.style.setProperty('--tilt-y', '0deg');
+  activeInnerPage?.classList.add('hidden');
+  activeInnerPage?.classList.remove('leaving');
+  activeInnerPage = page;
+  page.style.setProperty('--tilt-x', '0deg');
+  page.style.setProperty('--tilt-y', '0deg');
   document.body.classList.add('color-page-active');
   colorTool.profile.classList.remove('slide-to-home');
-  colorTool.profile.classList.add('slide-to-color');
-  colorTool.page.classList.remove('hidden', 'leaving');
-  colorTool.profile.classList.add('color-mode');
+  colorTool.profile.classList.add('slide-to-color', 'page-mode');
+  page.classList.remove('hidden', 'leaving');
   player.classList.add('hidden');
-  buildUnityRichText();
+  afterShow?.();
   setTimeout(() => {
     colorTool.profile.classList.remove('slide-to-color');
     resetCardPointer();
   }, 760);
 }
 
-function hideColorPage() {
+function hideInnerPage(page) {
+  if (!page) return;
   resetCardPointer();
-  colorTool.page.classList.add('leaving');
+  page.classList.add('leaving');
   colorTool.profile.classList.remove('slide-to-color');
   colorTool.profile.classList.add('slide-to-home');
   setTimeout(() => {
     document.body.classList.remove('color-page-active');
-    colorTool.profile.classList.remove('color-mode', 'slide-to-home');
-    colorTool.page.classList.add('hidden');
-    colorTool.page.classList.remove('leaving');
+    colorTool.profile.classList.remove('page-mode', 'slide-to-home');
+    page.classList.add('hidden');
+    page.classList.remove('leaving');
+    if (activeInnerPage === page) activeInnerPage = null;
     player.classList.remove('hidden');
     resetCardPointer();
   }, 560);
 }
 
+function showColorPage() {
+  showInnerPage(colorTool.page, buildUnityRichText);
+}
+
+function hideColorPage() {
+  hideInnerPage(colorTool.page);
+}
+
+function setText(element, value) {
+  if (element) element.textContent = value;
+}
+
+function setBotStatusDot(status = 'offline') {
+  if (!botPage.statusDot) return;
+  botPage.statusDot.className = `bot-status-dot ${status}`;
+}
+
+function formatUpdatedAt(value) {
+  const date = value ? new Date(value) : new Date();
+  return `Cập nhật ${date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+}
+
+function renderBotStatus(data) {
+  const bot = data.bot || {};
+  const music = data.music || {};
+  const lavalink = data.lavalink || {};
+  const nodes = lavalink.nodes || [];
+  const status = bot.status || 'offline';
+  const onlineNodes = Number.isFinite(lavalink.onlineCount)
+    ? lavalink.onlineCount
+    : nodes.filter(node => node.online).length;
+  const lavalinkText = onlineNodes > 0
+    ? `Đang chạy: ${onlineNodes} node・Online`
+    : 'Đang chạy: 0 node・Offline';
+
+  if (botPage.avatar && bot.avatar) botPage.avatar.src = bot.avatar;
+  if (botPage.hero) {
+    botPage.hero.style.backgroundImage = bot.banner
+      ? `linear-gradient(135deg, rgba(9,12,26,.86), rgba(16,18,35,.64) 54%, rgba(8,11,22,.88)), url('${bot.banner}')`
+      : '';
+  }
+  setBotStatusDot(status);
+  setText(botPage.statusText, `${status.toUpperCase()}${bot.tag ? ` • ${bot.tag}` : ''}`);
+  setText(botPage.pageTitle, bot.name || 'Music Bot');
+  setText(botPage.name, bot.name || 'Music Bot');
+  setText(botPage.customStatus, bot.customStatus || 'Không có custom status');
+  setText(botPage.ping, `${music.ping ?? '--'}ms`);
+  setText(botPage.servers, music.servers ?? '--');
+  setText(botPage.playing, `${music.playingRooms ?? '--'} phòng`);
+  setText(botPage.connected, `${music.connectedRooms ?? '--'} phòng`);
+  setText(botPage.runtime, music.runtime || '--');
+  setText(botPage.lavalink, lavalinkText);
+  setText(botPage.updatedAt, formatUpdatedAt(data.updatedAt));
+
+  if (botPage.invite && bot.inviteUrl) {
+    botPage.invite.href = bot.inviteUrl;
+    botPage.invite.classList.remove('disabled');
+  }
+}
+
+function renderBotStatusError() {
+  setBotStatusDot('offline');
+  setText(botPage.statusText, 'OFFLINE • Không kết nối được API');
+  setText(botPage.customStatus, 'Kiểm tra lại xem bot có đang chạy không!');
+  setText(botPage.updatedAt, 'API chưa phản hồi');
+}
+
+async function requestBotStatus(endpoint) {
+  const response = await fetch(`${endpoint}?t=${Date.now()}`, { cache: 'no-store' });
+  if (!response.ok) throw new Error(`Status ${response.status}`);
+  const data = await response.json();
+  if (!data.ok) throw new Error(data.message || 'Bot API not ready');
+  activeBotStatusApi = endpoint;
+  return data;
+}
+
+async function fetchBotStatus() {
+  try {
+    const endpoints = activeBotStatusApi
+      ? [activeBotStatusApi, ...BOT_STATUS_ENDPOINTS.filter(endpoint => endpoint !== activeBotStatusApi)]
+      : BOT_STATUS_ENDPOINTS;
+    let lastError = null;
+
+    for (const endpoint of endpoints) {
+      try {
+        const data = await requestBotStatus(endpoint);
+        renderBotStatus(data);
+        return;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error('No bot API endpoint responded');
+  } catch (error) {
+    console.warn('Bot status fetch failed:', error);
+    renderBotStatusError();
+  }
+}
+
+function startBotStatusPolling() {
+  fetchBotStatus();
+  clearInterval(botStatusTimer);
+  botStatusTimer = setInterval(fetchBotStatus, BOT_STATUS_REFRESH_MS);
+}
+
+function stopBotStatusPolling() {
+  clearInterval(botStatusTimer);
+  botStatusTimer = null;
+}
+
+function showBotPage() {
+  showInnerPage(botPage.page, startBotStatusPolling);
+}
+
+function hideBotPage() {
+  stopBotStatusPolling();
+  hideInnerPage(botPage.page);
+}
+
 if (colorTool.open) colorTool.open.addEventListener('click', (event) => { event.preventDefault(); showColorPage(); });
 if (colorTool.back) colorTool.back.addEventListener('click', hideColorPage);
+if (botPage.open) botPage.open.addEventListener('click', (event) => { event.preventDefault(); showBotPage(); });
+if (botPage.back) botPage.back.addEventListener('click', hideBotPage);
 ['input', 'change'].forEach((type) => {
   ['text', 'effect', 'font', 'size', 'c1', 'c2', 'c3', 'bold', 'italic', 'word'].forEach((key) => {
     colorTool[key]?.addEventListener(type, buildUnityRichText);
@@ -847,7 +1008,7 @@ function spawnPageRipple(event) {
 
 function getTiltTarget() {
   if (!interactiveCard) return null;
-  if (document.body.classList.contains('color-page-active') && colorTool.page && !colorTool.page.classList.contains('hidden')) return colorTool.page;
+  if (activeInnerPage && !activeInnerPage.classList.contains('hidden')) return activeInnerPage;
   return interactiveCard;
 }
 
