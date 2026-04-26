@@ -168,6 +168,14 @@ async function startMusic() {
   }
 }
 
+function pauseMusic() {
+  audio.pause();
+  playing = false;
+  playToggle.textContent = '▶';
+  document.getElementById('track-title').textContent = 'Weathering With You Lofi';
+  player.classList.add('paused');
+}
+
 function enterConsole() {
   showScreen(profileScreen);
   startMusic();
@@ -529,7 +537,7 @@ volumeSlider.addEventListener('input', () => {
   scheduleVolumeAutoClose();
 });
 
-['discord-link', 'youtube-link', 'x-link', 'github-link', 'page-one-link', 'page-two-link', 'mal-link'].forEach((id) => {
+['discord-link', 'youtube-link', 'x-link', 'github-link', 'page-one-link', 'page-two-link'].forEach((id) => {
   const element = document.getElementById(id);
   if (!element) return;
   element.addEventListener('click', (event) => {
@@ -543,3 +551,158 @@ volumeSlider.addEventListener('input', () => {
     }, 1600);
   });
 });
+
+const colorTool = {
+  page: document.getElementById('color-page'),
+  profile: document.querySelector('.profile-console'),
+  open: document.getElementById('mal-link'),
+  back: document.getElementById('color-back'),
+  text: document.getElementById('tc-input-text'),
+  effect: document.getElementById('tc-effect'),
+  font: document.getElementById('tc-font'),
+  size: document.getElementById('tc-size'),
+  c1: document.getElementById('tc-color-1'),
+  c2: document.getElementById('tc-color-2'),
+  c3: document.getElementById('tc-color-3'),
+  bold: document.getElementById('tc-bold'),
+  italic: document.getElementById('tc-italic'),
+  word: document.getElementById('tc-word'),
+  colorLabels: [...document.querySelectorAll('.color-picks label')],
+  preview: document.getElementById('tc-preview'),
+  output: document.getElementById('tc-output'),
+  copy: document.getElementById('tc-copy'),
+};
+
+function hexToRgb(hex) {
+  const value = hex.replace('#', '');
+  return [0, 2, 4].map((index) => parseInt(value.slice(index, index + 2), 16));
+}
+
+function rgbToHex([r, g, b]) {
+  return [r, g, b].map((value) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+function lerpColor(start, end, step, total) {
+  const ratio = total <= 1 ? 0 : step / (total - 1);
+  return start.map((value, index) => value + (end[index] - value) * ratio);
+}
+
+function colorAt(index, total, effect) {
+  const first = hexToRgb(colorTool.c1.value);
+  const mid = hexToRgb(colorTool.c2.value);
+  const last = hexToRgb(colorTool.c3.value);
+  if (effect === 'solid') return rgbToHex(first);
+  if (effect === 'rainbow') {
+    const hue = Math.round((index / Math.max(1, total)) * 300);
+    const tmp = document.createElement('span');
+    tmp.style.color = `hsl(${hue}, 100%, 62%)`;
+    document.body.appendChild(tmp);
+    const rgb = getComputedStyle(tmp).color.match(/\d+/g).slice(0, 3).map(Number);
+    tmp.remove();
+    return rgbToHex(rgb);
+  }
+  if (effect === 'three') {
+    const half = Math.max(1, Math.floor((total - 1) / 2));
+    return index <= half ? rgbToHex(lerpColor(first, mid, index, half + 1)) : rgbToHex(lerpColor(mid, last, index - half, total - half));
+  }
+  if (effect === 'mirror') {
+    const half = Math.max(1, Math.floor((total - 1) / 2));
+    return index <= half ? rgbToHex(lerpColor(first, mid, index, half + 1)) : rgbToHex(lerpColor(mid, first, index - half, total - half));
+  }
+  return rgbToHex(lerpColor(first, last, index, total));
+}
+
+function updateColorPickState() {
+  const effect = colorTool.effect.value;
+  const enabledMap = {
+    two: [true, false, true],
+    mirror: [true, true, false],
+    three: [true, true, true],
+    solid: [true, false, false],
+    random: [false, false, false],
+    rainbow: [false, false, false],
+  };
+  const enabled = enabledMap[effect] || [true, true, true];
+  colorTool.colorLabels.forEach((label, index) => {
+    label.classList.toggle('disabled', !enabled[index]);
+    const input = label.querySelector('input');
+    if (input) input.disabled = !enabled[index];
+  });
+  colorTool.word.closest('label')?.classList.toggle('disabled', effect !== 'random');
+  colorTool.word.disabled = effect !== 'random';
+}
+
+function buildUnityRichText() {
+  updateColorPickState();
+  const raw = colorTool.text.value || '';
+  const effect = colorTool.effect.value;
+  const tokens = effect === 'random' && colorTool.word.checked ? raw.split(/(\s+)/) : [...raw];
+  const visibleTokens = tokens.filter((token) => token.trim()).length || raw.length || 1;
+  let visibleIndex = 0;
+  let html = '';
+  let rich = '';
+
+  tokens.forEach((token, index) => {
+    if (!token.trim()) {
+      html += token;
+      rich += token;
+      return;
+    }
+    const color = effect === 'random'
+      ? rgbToHex([Math.random() * 255, Math.random() * 255, Math.random() * 255])
+      : colorAt(visibleIndex, visibleTokens, effect);
+    html += `<span style="color:#${color}">${token}</span>`;
+    rich += `<color=#${color}>${token}</color>`;
+    visibleIndex += 1;
+  });
+
+  if (colorTool.font.value) {
+    html = `<span style="font-family:${colorTool.font.value}">${html}</span>`;
+  }
+  if (colorTool.size.value !== '0') {
+    html = `<span style="font-size:${colorTool.size.value}px">${html}</span>`;
+    rich = `<size=${colorTool.size.value}>${rich}</size>`;
+  }
+  if (colorTool.italic.checked) {
+    html = `<i>${html}</i>`;
+    rich = `<i>${rich}</i>`;
+  }
+  if (colorTool.bold.checked) {
+    html = `<b>${html}</b>`;
+    rich = `<b>${rich}</b>`;
+  }
+
+  colorTool.preview.innerHTML = html || 'Preview sẽ hiện ở đây';
+  colorTool.output.value = rich;
+}
+
+function showColorPage() {
+  document.body.classList.add('color-page-active');
+  colorTool.profile.classList.add('color-mode');
+  colorTool.page.classList.remove('hidden');
+  player.classList.add('hidden');
+  pauseMusic();
+  buildUnityRichText();
+}
+
+function hideColorPage() {
+  document.body.classList.remove('color-page-active');
+  colorTool.profile.classList.remove('color-mode');
+  colorTool.page.classList.add('hidden');
+  player.classList.remove('hidden');
+  startMusic();
+}
+
+if (colorTool.open) colorTool.open.addEventListener('click', (event) => { event.preventDefault(); showColorPage(); });
+if (colorTool.back) colorTool.back.addEventListener('click', hideColorPage);
+['input', 'change'].forEach((type) => {
+  ['text', 'effect', 'font', 'size', 'c1', 'c2', 'c3', 'bold', 'italic', 'word'].forEach((key) => {
+    colorTool[key]?.addEventListener(type, buildUnityRichText);
+  });
+});
+colorTool.copy?.addEventListener('click', async () => {
+  await navigator.clipboard.writeText(colorTool.output.value);
+  colorTool.copy.textContent = 'Đã copy!';
+  setTimeout(() => { colorTool.copy.textContent = 'Copy Unity Rich Text'; }, 1200);
+});
+buildUnityRichText();

@@ -119,8 +119,65 @@
         <footer class="profile-footer">
           <a id="page-one-link" href="#">Page 1</a>
           <a id="page-two-link" href="#">Page 2</a>
-          <a id="mal-link" href="#">Page 3</a>
+          <a id="mal-link" href="#">Text color</a>
         </footer>
+
+        <section id="color-page" class="color-page hidden" aria-label="Unity Rich Text Gradient Generator">
+          <div class="color-page-head">
+            <button id="color-back" class="mini-btn" type="button">← Home</button>
+            <div>
+              <p class="eyebrow">Unity tool</p>
+              <h2>Rich Text Colorizer</h2>
+            </div>
+          </div>
+
+          <label class="field-block">
+            <span>Nhập văn bản</span>
+            <textarea id="tc-input-text" rows="4">Takeshi desu</textarea>
+          </label>
+
+          <div class="tool-grid">
+            <label class="field-block">
+              <span>Hiệu ứng màu</span>
+              <select id="tc-effect">
+                <option value="two">Dải hai màu</option>
+                <option value="mirror">Dải hai màu lặp lại</option>
+                <option value="three">Dải ba màu</option>
+                <option value="solid">Một màu</option>
+                <option value="random">Màu ngẫu nhiên</option>
+                <option value="rainbow">Cầu vồng</option>
+              </select>
+            </label>
+            <label class="field-block">
+              <span>Phông chữ</span>
+              <select id="tc-font">
+                <option value="">Mặc định</option><option>Arial</option><option>Verdana</option><option>Tahoma</option><option>Georgia</option><option>Courier New</option><option>Times New Roman</option><option>Trebuchet MS</option><option>Lucida Console</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="color-picks" aria-label="Chọn màu">
+            <label><span>Đầu</span><input id="tc-color-1" type="color" value="#ff4fd8"></label>
+            <label><span>Giữa</span><input id="tc-color-2" type="color" value="#5865f2"></label>
+            <label><span>Cuối</span><input id="tc-color-3" type="color" value="#35e8ff"></label>
+          </div>
+
+          <div class="tool-grid compact">
+            <label class="field-block"><span>Cỡ chữ</span><select id="tc-size"><option value="0">Mặc định</option><option value="12">12</option><option value="18">18</option><option value="24">24</option><option value="30">30</option><option value="36">36</option><option value="48">48</option><option value="60">60</option><option value="72">72</option><option value="90">90</option></select></label>
+            <div class="toggle-row"><label><input id="tc-bold" type="checkbox">Đậm</label><label><input id="tc-italic" type="checkbox">Ngiêng</label><label><input id="tc-word" type="checkbox">Random</label></div>
+          </div>
+
+          <div class="preview-card">
+            <span>Preview</span>
+            <div id="tc-preview" class="tc-preview"></div>
+          </div>
+
+          <label class="field-block output-block">
+            <span>Unity Rich Text</span>
+            <textarea id="tc-output" rows="6" readonly></textarea>
+          </label>
+          <button id="tc-copy" class="copy-btn" type="button">Copy Unity Rich Text</button>
+        </section>
       </article>
     </section>
   </main>
