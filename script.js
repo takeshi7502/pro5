@@ -429,6 +429,25 @@ function setDiscordDecoration(urls) {
   presenceEls.decoration.src = urls[index];
 }
 
+function formatVietnamTime() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  }).formatToParts(new Date());
+  const get = (type) => parts.find((part) => part.type === type)?.value || '';
+  return `VN ${get('hour')}:${get('minute')}:${get('second')} ${get('dayPeriod')}`;
+}
+
+function updateVietnamClock() {
+  presenceEls.updated.textContent = formatVietnamTime();
+}
+
+updateVietnamClock();
+setInterval(updateVietnamClock, 1000);
+
 async function fetchDiscordPresence() {
   try {
     const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`, { cache: 'no-store' });
@@ -449,7 +468,7 @@ async function fetchDiscordPresence() {
     presenceEls.username.textContent = user.username || 'takeshi';
     presenceEls.customStatusLine.textContent = customStatusText || '...';
     presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>${statusLabel}${clientText ? ` - ${clientText}` : ''}`;
-    presenceEls.updated.textContent = new Date().toLocaleTimeString('vi-VN', { hour12: false });
+    updateVietnamClock();
     if (avatarUrl) presenceEls.avatar.src = avatarUrl;
 
     setDiscordDecoration(discordDecorationUrls);
@@ -461,7 +480,7 @@ async function fetchDiscordPresence() {
     const status = setStatusClass('offline');
     presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>Chưa thể đồng bộ Discord`;
     presenceEls.customStatusLine.textContent = 'Không rõ';
-    presenceEls.updated.textContent = 'offline';
+    updateVietnamClock();
     presenceEls.spotifyStatus.textContent = 'Không rõ';
     presenceEls.publicFlags.innerHTML = '<span class="discord-badge empty">Không rõ</span>';
   }

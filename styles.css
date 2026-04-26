@@ -180,7 +180,7 @@ h1 { margin:0; font-size:clamp(24px, 5vw, 32px); line-height:.98; letter-spacing
 .inline-dot.online { background:var(--green); box-shadow:0 0 12px rgba(62,232,125,.5); }
 .inline-dot.idle { background:var(--yellow); }
 .inline-dot.dnd { background:var(--red); }
-.sync-pill { flex:0 0 auto; padding:7px 9px; border-radius:999px; color:#dfe5ff; background:rgba(88,101,242,.16); border:1px solid rgba(88,101,242,.25); font:700 10px "JetBrains Mono", monospace; }
+.sync-pill { flex:0 0 auto; padding:8px 10px; border-radius:999px; color:#dfe5ff; background:rgba(88,101,242,.16); border:1px solid rgba(88,101,242,.25); font:700 12px "JetBrains Mono", monospace; letter-spacing:.02em; }
 .activity-card.hidden { display:none; }
 .activity-card { display:flex; align-items:center; gap:12px; }
 .activity-icon { width:40px; height:40px; border-radius:10px; display:grid; place-items:center; background:linear-gradient(135deg, var(--discord), var(--cyan)); box-shadow:0 0 22px rgba(88,101,242,.24); flex:0 0 auto; }
