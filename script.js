@@ -170,33 +170,6 @@ function showScreen(screen) {
   player.classList.toggle('hidden', screen !== profileScreen);
 }
 
-async function startMusic() {
-  try {
-    audio.volume = 0.5;
-    volumeSlider.value = 15;
-    await audio.play();
-    playing = true;
-    playToggle.textContent = '❚❚';
-    document.getElementById('track-title').textContent = 'Đang phát Weathering With You Lofi';
-    player.classList.remove('paused');
-  } catch (error) {
-    console.warn('Autoplay blocked:', error);
-  }
-}
-
-function pauseMusic() {
-  audio.pause();
-  playing = false;
-  playToggle.textContent = '▶';
-  document.getElementById('track-title').textContent = 'Weathering With You Lofi';
-  player.classList.add('paused');
-}
-
-function enterConsole() {
-  showScreen(profileScreen);
-  startMusic();
-}
-
 function typeTextForTab(tab, text, speed = 14, onDone = () => {}) {
   let index = 0;
   const prefix = tab.log;
@@ -502,40 +475,117 @@ function rotateDecoration() {
 }
 setInterval(rotateDecoration, 5000);
 
+const trackTitle = document.getElementById('track-title');
+const nextTrackButton = document.getElementById('next-track');
+const currentTimeEl = document.getElementById('current-time');
+const durationTimeEl = document.getElementById('duration-time');
+const tracks = [
+  { title: 'Beautiful Piano Music', src: './data/music/2%20Hour%20Beautiful%20Piano%20Music.mp3' },
+  { title: 'Weathering With You Lofi', src: './data/music/Weathering_with_you_Lofi.mp3' },
+];
+let currentTrackIndex = 0;
 let playing = false;
+
 audio.volume = Number(volumeSlider.value) / 100;
 playToggle.textContent = '▶';
 player.classList.add('paused');
 
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const minutes = Math.floor(seconds / 60);
+  const remaining = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${minutes}:${remaining}`;
+}
+
+function renderTrackMeta() {
+  const track = tracks[currentTrackIndex];
+  trackTitle.textContent = track.title;
+  currentTimeEl.textContent = formatTime(audio.currentTime);
+  durationTimeEl.textContent = formatTime(audio.duration);
+}
+
+function loadTrack(index) {
+  currentTrackIndex = (index + tracks.length) % tracks.length;
+  const track = tracks[currentTrackIndex];
+  audio.src = track.src;
+  progressBar.style.width = '0%';
+  currentTimeEl.textContent = '0:00';
+  durationTimeEl.textContent = '0:00';
+  renderTrackMeta();
+}
+
+async function playCurrentTrack() {
+  await audio.play();
+  playing = true;
+  playToggle.textContent = '❚❚';
+  player.classList.remove('paused');
+  renderTrackMeta();
+}
+
+async function startMusic() {
+  try {
+    audio.volume = 0.15;
+    volumeSlider.value = 15;
+    await playCurrentTrack();
+  } catch (error) {
+    console.warn('Autoplay blocked:', error);
+  }
+}
+
+function pauseMusic() {
+  audio.pause();
+  playing = false;
+  playToggle.textContent = '▶';
+  player.classList.add('paused');
+  renderTrackMeta();
+}
+
+function enterConsole() {
+  showScreen(profileScreen);
+  startMusic();
+}
+
 playToggle.addEventListener('click', async () => {
   try {
     if (playing) {
-      audio.pause();
-      playing = false;
-      playToggle.textContent = '▶';
-      document.getElementById('track-title').textContent = 'Weathering With You Lofi';
-      player.classList.add('paused');
+      pauseMusic();
     } else {
-      audio.load();
-      await audio.play();
-      playing = true;
-      playToggle.textContent = '❚❚';
-      document.getElementById('track-title').textContent = 'Đang phát Weathering With You Lofi';
-      player.classList.remove('paused');
+      await playCurrentTrack();
     }
   } catch (error) {
     console.warn('Audio playback blocked or file missing:', error);
-    document.getElementById('track-title').textContent = 'Không mở được file nhạc';
+    trackTitle.textContent = 'Không mở được file nhạc';
   }
 });
 
-audio.addEventListener('error', () => {
-  document.getElementById('track-title').textContent = 'Không tìm thấy file nhạc';
+nextTrackButton.addEventListener('click', async () => {
+  const shouldResume = playing;
+  loadTrack(currentTrackIndex + 1);
+  if (!shouldResume) return;
+  try {
+    await playCurrentTrack();
+  } catch (error) {
+    console.warn('Unable to switch track:', error);
+    trackTitle.textContent = 'Không mở được file nhạc';
+  }
 });
 
+audio.addEventListener('loadedmetadata', renderTrackMeta);
+audio.addEventListener('error', () => {
+  trackTitle.textContent = 'Không tìm thấy file nhạc';
+});
+audio.addEventListener('ended', () => {
+  if (currentTrackIndex === 0) {
+    audio.currentTime = 0;
+  } else {
+    loadTrack(0);
+  }
+  playCurrentTrack().catch((error) => console.warn('Unable to autoplay next track:', error));
+});
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
   progressBar.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+  renderTrackMeta();
 });
 
 let volumeAutoCloseTimer;
@@ -570,20 +620,13 @@ volumeSlider.addEventListener('input', () => {
   scheduleVolumeAutoClose();
 });
 
-['discord-link', 'youtube-link', 'x-link', 'github-link', 'page-one-link', 'page-two-link'].forEach((id) => {
+['page-one-link', 'page-two-link'].forEach((id) => {
   const element = document.getElementById(id);
   if (!element) return;
-  element.addEventListener('click', (event) => {
-    const href = event.currentTarget.getAttribute('href');
-    if (href && href !== '#') return;
-    event.preventDefault();
-    const label = event.currentTarget.textContent.trim() || id;
-    document.getElementById('track-title').textContent = `Đã chọn ${label}`;
-    setTimeout(() => {
-      document.getElementById('track-title').textContent = 'Weathering With You Lofi';
-    }, 1600);
-  });
+  element.addEventListener('click', (event) => event.preventDefault());
 });
+
+renderTrackMeta();
 
 const colorTool = {
   page: document.getElementById('color-page'),
@@ -710,18 +753,24 @@ function buildUnityRichText() {
 }
 
 function showColorPage() {
+  resetCardPointer();
+  colorTool.page.style.setProperty('--tilt-x', '0deg');
+  colorTool.page.style.setProperty('--tilt-y', '0deg');
   document.body.classList.add('color-page-active');
   colorTool.profile.classList.remove('slide-to-home');
   colorTool.profile.classList.add('slide-to-color');
   colorTool.page.classList.remove('hidden', 'leaving');
   colorTool.profile.classList.add('color-mode');
   player.classList.add('hidden');
-  pauseMusic();
   buildUnityRichText();
-  setTimeout(() => colorTool.profile.classList.remove('slide-to-color'), 760);
+  setTimeout(() => {
+    colorTool.profile.classList.remove('slide-to-color');
+    resetCardPointer();
+  }, 760);
 }
 
 function hideColorPage() {
+  resetCardPointer();
   colorTool.page.classList.add('leaving');
   colorTool.profile.classList.remove('slide-to-color');
   colorTool.profile.classList.add('slide-to-home');
@@ -731,7 +780,7 @@ function hideColorPage() {
     colorTool.page.classList.add('hidden');
     colorTool.page.classList.remove('leaving');
     player.classList.remove('hidden');
-    startMusic();
+    resetCardPointer();
   }, 560);
 }
 
@@ -748,3 +797,117 @@ colorTool.copy?.addEventListener('click', async () => {
   setTimeout(() => { colorTool.copy.textContent = 'Copy Unity Rich Text'; }, 1200);
 });
 buildUnityRichText();
+
+const interactiveCard = document.querySelector('.profile-console');
+const pointerGlow = document.getElementById('pointer-glow');
+let activeTiltTarget = null;
+let rippleCooldown = 0;
+let pageRippleCooldown = 0;
+
+const CARD_RIPPLE_INTERVAL = 920;
+const PAGE_RIPPLE_INTERVAL = 1250;
+
+function updateGlobalPointer(event) {
+  document.body.style.setProperty('--pointer-x', `${event.clientX}px`);
+  document.body.style.setProperty('--pointer-y', `${event.clientY}px`);
+  document.body.classList.add('pointer-active');
+}
+
+function spawnPageRipple(event) {
+  if (document.body.classList.contains('terminal-active')) return;
+  const now = Date.now();
+  if (event.type === 'pointermove' && now - pageRippleCooldown < PAGE_RIPPLE_INTERVAL) return;
+  pageRippleCooldown = now;
+  const ripple = document.createElement('span');
+  ripple.className = 'page-ripple';
+  ripple.style.setProperty('--ripple-x', `${event.clientX}px`);
+  ripple.style.setProperty('--ripple-y', `${event.clientY}px`);
+  document.body.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+}
+
+function getTiltTarget() {
+  if (!interactiveCard) return null;
+  if (document.body.classList.contains('color-page-active') && colorTool.page && !colorTool.page.classList.contains('hidden')) return colorTool.page;
+  return interactiveCard;
+}
+
+function updateCardPointer(event) {
+  const target = getTiltTarget();
+  if (!target) return;
+  if (activeTiltTarget && activeTiltTarget !== target) resetCardPointer();
+  activeTiltTarget = target;
+  const rect = target.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const px = x / rect.width;
+  const py = y / rect.height;
+  const tiltY = (px - 0.5) * 9;
+  const tiltX = (0.5 - py) * 9;
+  target.style.setProperty('--glow-x', `${px * 100}%`);
+  target.style.setProperty('--glow-y', `${py * 100}%`);
+  target.style.setProperty('--tilt-x', `${tiltX.toFixed(2)}deg`);
+  target.style.setProperty('--tilt-y', `${tiltY.toFixed(2)}deg`);
+  target.classList.add('interactive-hover');
+}
+
+function resetCardPointer() {
+  const target = activeTiltTarget || interactiveCard;
+  if (!target) return;
+  target.classList.remove('interactive-hover');
+  target.style.setProperty('--tilt-x', '0deg');
+  target.style.setProperty('--tilt-y', '0deg');
+  activeTiltTarget = null;
+}
+
+function spawnCardRipple(event) {
+  const target = getTiltTarget();
+  if (!target) return;
+  const now = Date.now();
+  if (event.type === 'pointermove' && now - rippleCooldown < CARD_RIPPLE_INTERVAL) return;
+  rippleCooldown = now;
+  const rect = target.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'hover-ripple';
+  ripple.style.setProperty('--ripple-x', `${event.clientX - rect.left}px`);
+  ripple.style.setProperty('--ripple-y', `${event.clientY - rect.top}px`);
+  target.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+}
+
+if (pointerGlow) {
+  document.addEventListener('pointermove', (event) => {
+    updateGlobalPointer(event);
+    spawnPageRipple(event);
+  });
+  document.addEventListener('pointerdown', (event) => {
+    updateGlobalPointer(event);
+    spawnPageRipple(event);
+  });
+  document.addEventListener('pointerleave', () => document.body.classList.remove('pointer-active'));
+}
+
+if (interactiveCard) {
+  document.addEventListener('pointermove', (event) => {
+    const target = getTiltTarget();
+    if (!target || !target.contains(event.target)) {
+      if (activeTiltTarget) resetCardPointer();
+      return;
+    }
+    updateCardPointer(event);
+    spawnCardRipple(event);
+  });
+  document.addEventListener('pointerdown', (event) => {
+    const target = getTiltTarget();
+    if (!target || !target.contains(event.target)) return;
+    spawnCardRipple(event);
+  });
+  document.addEventListener('pointerover', (event) => {
+    const target = getTiltTarget();
+    if (target && target.contains(event.target)) activeTiltTarget = target;
+  });
+  document.addEventListener('pointerout', (event) => {
+    const target = activeTiltTarget;
+    if (target && !target.contains(event.relatedTarget)) resetCardPointer();
+  });
+}
