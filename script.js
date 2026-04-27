@@ -471,7 +471,7 @@ function startProfileNameTyping() {
 
     if (!deleting) {
       deleting = true;
-      setTimeout(tick, 1150);
+      setTimeout(tick, wordIndex === 0 ? 3000 : 1150);
       return;
     }
 
