@@ -45,6 +45,7 @@ const presenceEls = {
   activityTime: document.getElementById('activity-time'),
   spotifyStatus: document.getElementById('spotify-status'),
   publicFlags: document.getElementById('public-flags'),
+  typingName: document.getElementById('profile-typing-name'),
 };
 
 const statusLabels = {
@@ -53,6 +54,8 @@ const statusLabels = {
   dnd: 'Đừng làm phiền',
   offline: 'Đang offline',
 };
+
+const profileTypingWords = ['Takeshi', 'Freelancer', 'Hikikomori', 'Neet', 'Fan Anime'];
 
 const activityTypes = {
   0: { label: 'Đang chơi', icon: '🎮' },
@@ -448,6 +451,46 @@ function updateVietnamClock() {
 updateVietnamClock();
 setInterval(updateVietnamClock, 1000);
 
+function startProfileNameTyping() {
+  const target = presenceEls.typingName;
+  if (!target) return;
+
+  let wordIndex = 0;
+  let charIndex = 0;
+  let deleting = false;
+
+  const tick = () => {
+    const word = profileTypingWords[wordIndex];
+    target.textContent = word.slice(0, charIndex);
+
+    if (!deleting && charIndex < word.length) {
+      charIndex += 1;
+      setTimeout(tick, 100);
+      return;
+    }
+
+    if (!deleting) {
+      deleting = true;
+      setTimeout(tick, 1150);
+      return;
+    }
+
+    if (charIndex > 0) {
+      charIndex -= 1;
+      setTimeout(tick, 60);
+      return;
+    }
+
+    deleting = false;
+    wordIndex = (wordIndex + 1) % profileTypingWords.length;
+    setTimeout(tick, 260);
+  };
+
+  tick();
+}
+
+startProfileNameTyping();
+
 async function fetchDiscordPresence() {
   try {
     const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`, { cache: 'no-store' });
@@ -464,7 +507,7 @@ async function fetchDiscordPresence() {
     const avatarUrl = getAvatarUrl(user);
     const discordDecorationUrls = getDiscordDecorationUrls(user);
 
-    presenceEls.displayName.textContent = user.global_name || user.display_name || 'Takeshi';
+    profileTypingWords[0] = user.global_name || user.display_name || 'Takeshi';
     presenceEls.username.textContent = user.username || 'takeshi';
     presenceEls.customStatusLine.textContent = customStatusText || '...';
     presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>${statusLabel}${clientText ? ` - ${clientText}` : ''}`;

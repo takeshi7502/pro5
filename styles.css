@@ -160,8 +160,8 @@ body.color-page-active .profile-console { margin-top:0; }
 .status-orb::after { content:""; position:absolute; pointer-events:none; }
 .status-orb.online { background:#23a55a; box-shadow:0 0 16px rgba(35,165,90,.48); }
 .status-orb.online::after { display:none; }
-.status-orb.idle { background:#f0b232; box-shadow:0 0 16px rgba(240,178,50,.42); }
-.status-orb.idle::after { width:18px; height:18px; border-radius:50%; right:-3px; top:-3px; background:rgba(15,18,32,.98); }
+.status-orb.idle { background:transparent url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 23"%3E%3Cpath fill="%23faa61a" fill-rule="evenodd" d="M 11.550781 -0.00390625 C 11.847656 -0.00390625 12.144531 -0.00390625 12.441406 -0.00390625 C 15.25 0.121094 17.71875 1.054688 19.84375 2.789062 C 21.714844 4.359375 22.972656 6.300781 23.617188 8.613281 C 23.847656 9.484375 23.972656 10.371094 23.996094 11.265625 C 23.996094 11.417969 23.996094 11.574219 23.996094 11.726562 C 23.90625 14.496094 22.933594 16.925781 21.074219 19.023438 C 19.386719 20.871094 17.296875 22.089844 14.800781 22.6875 C 14.023438 22.863281 13.234375 22.964844 12.441406 22.996094 C 12.140625 22.996094 11.84375 22.996094 11.542969 22.996094 C 8.800781 22.871094 6.378906 21.976562 4.273438 20.308594 C 2.367188 18.75 1.074219 16.804688 0.398438 14.476562 C 0.164062 13.621094 0.03125 12.75 -0.00390625 11.863281 C -0.00390625 11.621094 -0.00390625 11.378906 -0.00390625 11.136719 C 0.0234375 10.425781 0.113281 9.722656 0.273438 9.027344 C 0.847656 10.859375 1.988281 12.265625 3.691406 13.246094 C 5.175781 14.058594 6.761719 14.355469 8.457031 14.136719 C 10.15625 13.886719 11.601562 13.171875 12.789062 11.996094 C 14.117188 10.621094 14.796875 8.988281 14.824219 7.101562 C 14.792969 5.203125 14.109375 3.566406 12.765625 2.1875 C 11.832031 1.265625 10.714844 0.621094 9.417969 0.261719 C 10.121094 0.113281 10.832031 0.0234375 11.550781 -0.00390625 Z M 11.550781 -0.00390625"/%3E%3C/svg%3E') center/22px 22px no-repeat; box-shadow:none; }
+.status-orb.idle::after { display:none; }
 .status-orb.dnd { background:#f23f43; box-shadow:0 0 16px rgba(242,63,67,.42); }
 .status-orb.dnd::after { left:50%; top:50%; width:14px; height:5px; border-radius:99px; background:#fff; transform:translate(-50%, -50%); }
 .status-orb.offline { background:#80848e; box-shadow:none; }
@@ -169,6 +169,8 @@ body.color-page-active .profile-console { margin-top:0; }
 .identity-block { min-width:0; padding-bottom:5px; }
 .eyebrow { margin:0 0 5px; color:#b9c1ff; text-transform:uppercase; letter-spacing:.12em; font-size:10px; font-weight:800; }
 h1 { margin:0; font-size:clamp(24px, 5vw, 32px); line-height:.98; letter-spacing:-.035em; }
+.profile-typing-name { display:inline; min-height:1em; background:linear-gradient(90deg, #fff, #ffd6f5 42%, #a9f6ff); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 22px rgba(255,79,216,.18); }
+.profile-typing-cursor { display:inline-block; margin-left:2px; color:#fff; font-weight:500; text-shadow:0 0 12px rgba(255,255,255,.58); animation:typingCaret .8s infinite; }
 .username { margin:6px 0 0; color:var(--muted); font-weight:600; }
 
 .presence-card, .activity-card, .about-card { margin:0 20px 11px; padding:14px; border:1px solid rgba(255,255,255,.09); background:rgba(255,255,255,.045); border-radius:12px; }
@@ -257,9 +259,11 @@ h1 { margin:0; font-size:clamp(24px, 5vw, 32px); line-height:.98; letter-spacing
 .bot-avatar-wrap { width:68px; height:68px; flex:0 0 auto; position:relative; border-radius:20px; padding:3px; background:linear-gradient(135deg, var(--discord), var(--pink) 55%, var(--cyan)); box-shadow:0 18px 42px rgba(88,101,242,.28), 0 0 30px rgba(255,79,216,.16); }
 .bot-avatar { width:100%; height:100%; display:block; border-radius:17px; object-fit:cover; background:rgba(8,11,22,.78); }
 .bot-avatar[src=""] { visibility:hidden; }
-.bot-status-dot { position:absolute; right:0; bottom:0; width:16px; height:16px; border-radius:50%; border:3px solid #111626; background:#8791a8; box-shadow:0 0 0 4px rgba(135,145,168,.12); }
+.bot-status-dot { position:absolute; right:0; bottom:0; width:16px; height:16px; border-radius:50%; border:3px solid #111626; background:#8791a8; box-shadow:0 0 0 4px rgba(135,145,168,.12); background-position:center; background-repeat:no-repeat; background-size:100% 100%; }
+.bot-status-dot::after { content:""; display:none; }
 .bot-status-dot.online { background:#32f5a1; box-shadow:0 0 18px rgba(50,245,161,.7); }
-.bot-status-dot.idle { background:#ffd166; box-shadow:0 0 18px rgba(255,209,102,.65); }
+.bot-status-dot.idle { width:20px; height:20px; right:-2px; bottom:-2px; border:4px solid #111626; background-color:transparent; background-image:url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 23"%3E%3Cpath fill="%23faa61a" fill-rule="evenodd" d="M 11.550781 -0.00390625 C 11.847656 -0.00390625 12.144531 -0.00390625 12.441406 -0.00390625 C 15.25 0.121094 17.71875 1.054688 19.84375 2.789062 C 21.714844 4.359375 22.972656 6.300781 23.617188 8.613281 C 23.847656 9.484375 23.972656 10.371094 23.996094 11.265625 C 23.996094 11.417969 23.996094 11.574219 23.996094 11.726562 C 23.90625 14.496094 22.933594 16.925781 21.074219 19.023438 C 19.386719 20.871094 17.296875 22.089844 14.800781 22.6875 C 14.023438 22.863281 13.234375 22.964844 12.441406 22.996094 C 12.140625 22.996094 11.84375 22.996094 11.542969 22.996094 C 8.800781 22.871094 6.378906 21.976562 4.273438 20.308594 C 2.367188 18.75 1.074219 16.804688 0.398438 14.476562 C 0.164062 13.621094 0.03125 12.75 -0.00390625 11.863281 C -0.00390625 11.621094 -0.00390625 11.378906 -0.00390625 11.136719 C 0.0234375 10.425781 0.113281 9.722656 0.273438 9.027344 C 0.847656 10.859375 1.988281 12.265625 3.691406 13.246094 C 5.175781 14.058594 6.761719 14.355469 8.457031 14.136719 C 10.15625 13.886719 11.601562 13.171875 12.789062 11.996094 C 14.117188 10.621094 14.796875 8.988281 14.824219 7.101562 C 14.792969 5.203125 14.109375 3.566406 12.765625 2.1875 C 11.832031 1.265625 10.714844 0.621094 9.417969 0.261719 C 10.121094 0.113281 10.832031 0.0234375 11.550781 -0.00390625 Z M 11.550781 -0.00390625"/%3E%3C/svg%3E'); background-position:center; background-repeat:no-repeat; background-size:20px 20px; box-shadow:none; }
+.bot-status-dot.idle::after { display:none; }
 .bot-status-dot.dnd { background:#ff5f7a; box-shadow:0 0 18px rgba(255,95,122,.65); }
 .bot-status-dot.offline { background:#8791a8; box-shadow:0 0 0 4px rgba(135,145,168,.12); }
 .bot-kicker { display:block; margin-bottom:5px; color:#bff7ff; font:800 10px "JetBrains Mono", monospace; letter-spacing:.14em; text-transform:uppercase; text-shadow:0 2px 14px rgba(0,0,0,.45); }
@@ -340,7 +344,10 @@ h1 { margin:0; font-size:clamp(24px, 5vw, 32px); line-height:.98; letter-spacing
   .social-row { grid-template-columns: repeat(2, 1fr); padding-left: 16px; padding-right: 16px; }
   .profile-footer { padding-left: 16px; padding-right: 16px; }
   .bot-page { padding:16px; }
-  .bot-hero, .bot-actions { flex-direction:column; align-items:flex-start; }
+  .bot-hero { flex-direction:column; align-items:flex-start; }
+  .bot-actions { width:100%; flex-direction:column; align-items:stretch; gap:8px; }
+  .bot-actions .invite-btn { width:100%; text-align:center; }
+  .bot-actions .bot-note { text-align:center; }
   .bot-live-grid { grid-template-columns:repeat(2, 1fr); }
   .bot-live-grid article.wide { grid-column:span 2; }
   .bot-feature-grid { grid-template-columns:1fr; }
@@ -362,9 +369,11 @@ h1 { margin:0; font-size:clamp(24px, 5vw, 32px); line-height:.98; letter-spacing
   .volume-control { right:-46px; }
   .volume-control input { left:50%; bottom:46px; transform:translateX(-50%) rotate(-90deg); transform-origin:center; }
   .volume-control.open input { width:110px; }
-  .bot-live-grid { grid-template-columns:1fr; }
-  .bot-live-grid article.wide { grid-column:auto; }
+  .bot-live-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .bot-live-grid article.wide { grid-column:span 2; }
 }
+
+@keyframes typingCaret { 50% { opacity:0; } }
 
 @media (max-width: 340px) {
   .profile-header { flex-direction: column; align-items: flex-start; }
