@@ -16,13 +16,6 @@ const DECORATIONS = [
 const terminalScreen = document.getElementById('terminal-screen');
 const profileScreen = document.getElementById('profile-screen');
 const enterButton = document.getElementById('enter-console-btn');
-const playToggle = document.getElementById('play-toggle');
-const player = document.getElementById('music-player');
-const audio = document.getElementById('audio-player');
-const progressBar = document.getElementById('progress-bar');
-const volumeControl = document.getElementById('volume-control');
-const volumeToggle = document.getElementById('volume-toggle');
-const volumeSlider = document.getElementById('volume-slider');
 const cmdTabs = document.getElementById('cmd-tabs');
 const cmdNewTab = document.getElementById('cmd-new-tab');
 const cmdLog = document.getElementById('cmd-log');
@@ -170,7 +163,6 @@ function showScreen(screen) {
   [terminalScreen, profileScreen].forEach((item) => item.classList.remove('active'));
   screen.classList.add('active');
   document.body.classList.toggle('terminal-active', screen === terminalScreen);
-  player.classList.toggle('hidden', screen !== profileScreen);
 }
 
 function typeTextForTab(tab, text, speed = 14, onDone = () => {}) {
@@ -537,150 +529,9 @@ function rotateDecoration() {
 }
 setInterval(rotateDecoration, 5000);
 
-const trackTitle = document.getElementById('track-title');
-const nextTrackButton = document.getElementById('next-track');
-const currentTimeEl = document.getElementById('current-time');
-const durationTimeEl = document.getElementById('duration-time');
-const tracks = [
-  { title: 'Beautiful Piano Music', src: './data/music/2%20Hour%20Beautiful%20Piano%20Music.mp3' },
-  { title: 'Weathering With You Lofi', src: './data/music/Weathering_with_you_Lofi.mp3' },
-];
-let currentTrackIndex = 0;
-let playing = false;
-
-audio.volume = Number(volumeSlider.value) / 100;
-playToggle.textContent = '▶';
-player.classList.add('paused');
-
-function formatTime(seconds) {
-  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
-  const minutes = Math.floor(seconds / 60);
-  const remaining = Math.floor(seconds % 60).toString().padStart(2, '0');
-  return `${minutes}:${remaining}`;
-}
-
-function renderTrackMeta() {
-  const track = tracks[currentTrackIndex];
-  trackTitle.textContent = track.title;
-  currentTimeEl.textContent = formatTime(audio.currentTime);
-  durationTimeEl.textContent = formatTime(audio.duration);
-}
-
-function loadTrack(index) {
-  currentTrackIndex = (index + tracks.length) % tracks.length;
-  const track = tracks[currentTrackIndex];
-  audio.src = track.src;
-  progressBar.style.width = '0%';
-  currentTimeEl.textContent = '0:00';
-  durationTimeEl.textContent = '0:00';
-  renderTrackMeta();
-}
-
-async function playCurrentTrack() {
-  await audio.play();
-  playing = true;
-  playToggle.textContent = '❚❚';
-  player.classList.remove('paused');
-  renderTrackMeta();
-}
-
-async function startMusic() {
-  try {
-    audio.volume = 0.15;
-    volumeSlider.value = 15;
-    await playCurrentTrack();
-  } catch (error) {
-    console.warn('Autoplay blocked:', error);
-  }
-}
-
-function pauseMusic() {
-  audio.pause();
-  playing = false;
-  playToggle.textContent = '▶';
-  player.classList.add('paused');
-  renderTrackMeta();
-}
-
 function enterConsole() {
   showScreen(profileScreen);
-  startMusic();
 }
-
-playToggle.addEventListener('click', async () => {
-  try {
-    if (playing) {
-      pauseMusic();
-    } else {
-      await playCurrentTrack();
-    }
-  } catch (error) {
-    console.warn('Audio playback blocked or file missing:', error);
-    trackTitle.textContent = 'Không mở được file nhạc';
-  }
-});
-
-nextTrackButton.addEventListener('click', async () => {
-  const shouldResume = playing;
-  loadTrack(currentTrackIndex + 1);
-  if (!shouldResume) return;
-  try {
-    await playCurrentTrack();
-  } catch (error) {
-    console.warn('Unable to switch track:', error);
-    trackTitle.textContent = 'Không mở được file nhạc';
-  }
-});
-
-audio.addEventListener('loadedmetadata', renderTrackMeta);
-audio.addEventListener('error', () => {
-  trackTitle.textContent = 'Không tìm thấy file nhạc';
-});
-audio.addEventListener('ended', () => {
-  if (currentTrackIndex === 0) {
-    audio.currentTime = 0;
-  } else {
-    loadTrack(0);
-  }
-  playCurrentTrack().catch((error) => console.warn('Unable to autoplay next track:', error));
-});
-audio.addEventListener('timeupdate', () => {
-  if (!audio.duration) return;
-  progressBar.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
-  renderTrackMeta();
-});
-
-let volumeAutoCloseTimer;
-
-function scheduleVolumeAutoClose() {
-  clearTimeout(volumeAutoCloseTimer);
-  if (!volumeControl.classList.contains('open')) return;
-  volumeAutoCloseTimer = setTimeout(() => {
-    volumeControl.classList.remove('open');
-  }, 2000);
-}
-
-volumeToggle.addEventListener('click', (event) => {
-  event.stopPropagation();
-  volumeControl.classList.toggle('open');
-  if (volumeControl.classList.contains('open')) {
-    volumeSlider.focus();
-    scheduleVolumeAutoClose();
-  } else {
-    clearTimeout(volumeAutoCloseTimer);
-  }
-});
-
-volumeControl.addEventListener('pointermove', scheduleVolumeAutoClose);
-volumeControl.addEventListener('pointerdown', scheduleVolumeAutoClose);
-
-volumeSlider.addEventListener('input', () => {
-  const volume = Number(volumeSlider.value) / 100;
-  audio.volume = volume;
-  const icon = volume === 0 ? '🔇' : volume < 0.45 ? '🔉' : '🔊';
-  volumeToggle.textContent = icon;
-  scheduleVolumeAutoClose();
-});
 
 ['page-one-link', 'page-two-link'].forEach((id) => {
   const element = document.getElementById(id);
@@ -688,10 +539,8 @@ volumeSlider.addEventListener('input', () => {
   element.addEventListener('click', (event) => event.preventDefault());
 });
 
-renderTrackMeta();
-
 const colorTool = {
-  page: document.getElementById('color-page'),
+  page: document.getElementById('tab-colorizer'),
   profile: document.querySelector('.profile-console'),
   open: document.getElementById('mal-link'),
   back: document.getElementById('color-back'),
@@ -723,7 +572,7 @@ let botStatusTimer = null;
 let activeBotStatusApi = null;
 
 const botPage = {
-  page: document.getElementById('bot-page'),
+  page: document.getElementById('tab-bot'),
   open: document.getElementById('page-two-link'),
   back: document.getElementById('bot-back'),
   avatar: document.getElementById('bot-avatar'),
@@ -860,7 +709,6 @@ function showInnerPage(page, afterShow) {
   colorTool.profile.classList.remove('slide-to-home');
   colorTool.profile.classList.add('slide-to-color', 'page-mode');
   page.classList.remove('hidden', 'leaving');
-  player.classList.add('hidden');
   afterShow?.();
   setTimeout(() => {
     colorTool.profile.classList.remove('slide-to-color');
@@ -880,7 +728,6 @@ function hideInnerPage(page) {
     page.classList.add('hidden');
     page.classList.remove('leaving');
     if (activeInnerPage === page) activeInnerPage = null;
-    player.classList.remove('hidden');
     resetCardPointer();
   }, 560);
 }
@@ -1036,18 +883,7 @@ function updateGlobalPointer(event) {
   document.body.classList.add('pointer-active');
 }
 
-function spawnPageRipple(event) {
-  if (document.body.classList.contains('terminal-active')) return;
-  const now = Date.now();
-  if (event.type === 'pointermove' && now - pageRippleCooldown < PAGE_RIPPLE_INTERVAL) return;
-  pageRippleCooldown = now;
-  const ripple = document.createElement('span');
-  ripple.className = 'page-ripple';
-  ripple.style.setProperty('--ripple-x', `${event.clientX}px`);
-  ripple.style.setProperty('--ripple-y', `${event.clientY}px`);
-  document.body.appendChild(ripple);
-  ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
-}
+function spawnPageRipple() {}
 
 function getTiltTarget() {
   if (!interactiveCard) return null;
@@ -1065,8 +901,8 @@ function updateCardPointer(event) {
   const y = event.clientY - rect.top;
   const px = x / rect.width;
   const py = y / rect.height;
-  const tiltY = (px - 0.5) * 9;
-  const tiltX = (0.5 - py) * 9;
+  const tiltY = (px - 0.5) * 2.2;
+  const tiltX = (0.5 - py) * 2.2;
   target.style.setProperty('--glow-x', `${px * 100}%`);
   target.style.setProperty('--glow-y', `${py * 100}%`);
   target.style.setProperty('--tilt-x', `${tiltX.toFixed(2)}deg`);
@@ -1083,29 +919,14 @@ function resetCardPointer() {
   activeTiltTarget = null;
 }
 
-function spawnCardRipple(event) {
-  const target = getTiltTarget();
-  if (!target) return;
-  const now = Date.now();
-  if (event.type === 'pointermove' && now - rippleCooldown < CARD_RIPPLE_INTERVAL) return;
-  rippleCooldown = now;
-  const rect = target.getBoundingClientRect();
-  const ripple = document.createElement('span');
-  ripple.className = 'hover-ripple';
-  ripple.style.setProperty('--ripple-x', `${event.clientX - rect.left}px`);
-  ripple.style.setProperty('--ripple-y', `${event.clientY - rect.top}px`);
-  target.appendChild(ripple);
-  ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
-}
+function spawnCardRipple() {}
 
 if (pointerGlow) {
   document.addEventListener('pointermove', (event) => {
     updateGlobalPointer(event);
-    spawnPageRipple(event);
   });
   document.addEventListener('pointerdown', (event) => {
     updateGlobalPointer(event);
-    spawnPageRipple(event);
   });
   document.addEventListener('pointerleave', () => document.body.classList.remove('pointer-active'));
 }
@@ -1118,12 +939,10 @@ if (interactiveCard) {
       return;
     }
     updateCardPointer(event);
-    spawnCardRipple(event);
   });
   document.addEventListener('pointerdown', (event) => {
     const target = getTiltTarget();
     if (!target || !target.contains(event.target)) return;
-    spawnCardRipple(event);
   });
   document.addEventListener('pointerover', (event) => {
     const target = getTiltTarget();
@@ -1134,3 +953,53 @@ if (interactiveCard) {
     if (target && !target.contains(event.relatedTarget)) resetCardPointer();
   });
 }
+
+// Panel Toggle (Collapse / Expand right widgets panel)
+const panelToggleBtn = document.getElementById('panelToggleBtn');
+const rightPanelContainer = document.getElementById('rightPanelContainer');
+
+if (panelToggleBtn && rightPanelContainer) {
+  panelToggleBtn.addEventListener('click', () => {
+    const isCollapsed = rightPanelContainer.classList.toggle('collapsed');
+    interactiveCard?.classList.toggle('collapsed', isCollapsed);
+    panelToggleBtn.classList.toggle('is-collapsed', isCollapsed);
+    if (isCollapsed) {
+      panelToggleBtn.setAttribute('title', 'Mở rộng bảng');
+      panelToggleBtn.setAttribute('aria-label', 'Mở rộng bảng');
+    } else {
+      panelToggleBtn.setAttribute('title', 'Thu gọn bảng');
+      panelToggleBtn.setAttribute('aria-label', 'Thu gọn bảng');
+    }
+  });
+}
+
+// Navigation Tabs Switching
+const navTabBtns = document.querySelectorAll('.nav-tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+
+navTabBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const targetTab = btn.getAttribute('data-tab');
+    if (!targetTab) return;
+
+    navTabBtns.forEach((b) => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    tabContents.forEach((c) => c.classList.remove('active'));
+
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    const targetContent = document.getElementById(`tab-${targetTab}`);
+    if (targetContent) {
+      targetContent.classList.add('active');
+    }
+    if (targetTab === 'colorizer') {
+      buildUnityRichText();
+    } else if (targetTab === 'bot') {
+      startBotStatusPolling();
+    } else {
+      stopBotStatusPolling();
+    }
+  });
+});

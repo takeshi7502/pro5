@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="https://cdn.discordapp.com/emojis/1111630069362868244.webp" />
@@ -19,8 +19,6 @@
 </head>
 
 <body class="terminal-active">
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
   <div id="pointer-glow" class="pointer-glow" aria-hidden="true"></div>
   <div class="scanlines" aria-hidden="true"></div>
 
@@ -44,202 +42,301 @@
     </section>
 
     <section id="profile-screen" class="screen profile-screen" aria-label="Trang hồ sơ chính">
-      <article class="profile-console glass-panel">
-        <div class="profile-banner">
-          <img id="banner-image" src="https://i.pinimg.com/originals/20/cc/a0/20cca0b04e912510dbfd30b4608972b6.gif"
-            alt="Ảnh bìa hồ sơ" />
-          <div class="banner-glow"></div>
+      <article class="profile-console glass-panel collapsed">
+        <!-- BEGIN: Left Profile Column -->
+        <aside class="profile-left-col" aria-label="Thông tin chính">
+          <div class="profile-fixed-top">
+            <div class="profile-banner">
+              <img id="banner-image" src="https://i.pinimg.com/originals/20/cc/a0/20cca0b04e912510dbfd30b4608972b6.gif"
+                alt="Ảnh bìa hồ sơ" />
+              <div class="banner-glow"></div>
+            </div>
+
+            <div class="profile-header">
+              <div class="avatar-wrap">
+                <img id="avatar-image" class="avatar-image avatar-glow" src="" alt="Ảnh đại diện Discord" />
+                <div id="avatar-fallback" class="avatar-fallback">T</div>
+                <img id="avatar-decoration" class="avatar-decoration" src="./data/decoration/anime-nani.png"
+                  alt="Trang trí avatar" />
+                <span id="status-orb" class="status-orb offline" aria-label="Trạng thái Discord"></span>
+              </div>
+
+              <div class="custom-status-pill" title="Custom status">
+                <span id="custom-status-line">u gay</span>
+              </div>
+            </div>
+
+            <div class="identity-section">
+              <h1 id="display-name"><span id="profile-typing-name" class="profile-typing-name">Takeshi</span><span class="profile-typing-cursor" aria-hidden="true">|</span></h1>
+              <div class="handle-bar">
+                <span class="username">@<span id="username">takeshi7502</span></span>
+                <span class="dot-sep">•</span>
+                <span class="server-badge" title="Server Tag"><span class="badge-ico">💮</span><span>KFS</span></span>
+                <span id="last-updated" class="sync-clock">VN --:--:--</span>
+              </div>
+              <p id="status-text" class="status-subtext"><span class="inline-dot offline"></span>Đang kết nối Discord...</p>
+            </div>
+
+            <div id="public-flags" class="badge-list" aria-label="Huy hiệu hồ sơ"></div>
+
+            <div class="profile-actions-row">
+              <a id="telegram-link" class="btn-primary-action" href="https://t.me/takeshi7502" target="_blank" rel="noopener noreferrer" title="Gửi tin nhắn qua Telegram">
+                <span>Tin nhắn</span>
+              </a>
+              <a id="discord-user-profile" class="btn-icon-action" href="https://discord.com/users/648036769769717760" target="_blank" rel="noopener noreferrer" aria-label="Hồ sơ Discord" title="Hồ sơ Discord">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+              </a>
+              <button id="panelToggleBtn" class="btn-icon-action panel-toggle-btn is-collapsed" type="button" aria-label="Mở rộng bảng" title="Mở rộng bảng">
+                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="15" y1="3" x2="15" y2="21"/>
+                  <polyline id="toggleChevron" points="11 9 8 12 11 15"/>
+                </svg>
+              </button>
+            </div>
+
+            <hr class="col-divider" />
+          </div>
+
+          <div class="profile-scroll-body">
+            <div class="info-section">
+              <div class="section-label">Tiểu sử</div>
+              <p class="bio-text">Một góc hồ sơ nhỏ gọn của Takeshi, lấy cảm hứng nhẹ từ Discord nhưng vẫn giữ phong cách anime riêng: tối, gọn, mượt và có chiều sâu.</p>
+              <div class="tags" aria-label="Thẻ hồ sơ">
+                <span>Anime</span>
+                <span>Music</span>
+                <span>Genshin</span>
+                <span>Coder</span>
+                <span>Cheater</span>
+              </div>
+            </div>
+
+            <div class="info-section">
+              <div class="section-label">Kết Nối</div>
+              <div class="connections-list">
+                <a class="conn-item" href="https://takeshi.dev" target="_blank" rel="noopener noreferrer">
+                  <span class="conn-left"><span class="conn-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></span><span class="conn-name">takeshi.dev</span></span>
+                  <svg class="conn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </a>
+                <a class="conn-item" href="https://discord.gg/eGkwfAQKMF" target="_blank" rel="noopener noreferrer">
+                  <span class="conn-left"><span class="conn-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></span><span class="conn-name">Discord Server</span></span>
+                  <svg class="conn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </a>
+                <a class="conn-item" href="http://youtube.com/@takeshi7502" target="_blank" rel="noopener noreferrer">
+                  <span class="conn-left"><span class="conn-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span><span class="conn-name">YouTube</span></span>
+                  <svg class="conn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </a>
+                <a class="conn-item" href="http://x.com/takeshi7502" target="_blank" rel="noopener noreferrer">
+                  <span class="conn-left"><span class="conn-icon"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span><span class="conn-name">X (Twitter)</span></span>
+                  <svg class="conn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </a>
+                <a class="conn-item conn-item-wide" href="https://github.com/takeshi7502" target="_blank" rel="noopener noreferrer">
+                  <span class="conn-left"><span class="conn-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></span><span class="conn-name">GitHub</span></span>
+                  <svg class="conn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </aside>
+        <!-- END: Left Profile Column -->
+
+        <!-- BEGIN: Right Widgets Column -->
+        <div id="rightPanelContainer" class="right-panel-container collapsed">
+          <main class="right-widgets-inner" aria-label="Nội dung chi tiết">
+            <!-- Navigation Tabs -->
+            <nav class="widgets-nav-tabs" role="tablist">
+              <button class="nav-tab-btn active" data-tab="board" type="button" role="tab" aria-selected="true">
+                Bảng
+                <span class="tab-indicator"></span>
+              </button>
+              <button class="nav-tab-btn" data-tab="activity" type="button" role="tab" aria-selected="false">
+                Hoạt động
+                <span class="tab-indicator"></span>
+              </button>
+              <button class="nav-tab-btn" data-tab="colorizer" type="button" role="tab" aria-selected="false">
+                Unity Text
+                <span class="tab-indicator"></span>
+              </button>
+              <button class="nav-tab-btn" data-tab="bot" type="button" role="tab" aria-selected="false">
+                Discord Bot
+                <span class="tab-indicator"></span>
+              </button>
+            </nav>
+
+            <!-- TAB 1: Bảng (Dashboard) -->
+            <div id="tab-board" class="tab-content active" role="tabpanel">
+              <!-- Featured Showcase Card -->
+              <div class="featured-showcase-card">
+                <div class="showcase-info">
+                  <div class="showcase-tag"><span class="tag-ico">🍥</span><span>waku</span></div>
+                  <h3 class="showcase-name">Takeshi</h3>
+                  <div class="showcase-meta">
+                    <span class="showcase-handle">@takeshi7502</span>
+                    <a class="showcase-link" href="https://takeshi.dev" target="_blank" rel="noopener noreferrer">https://takeshi.dev</a>
+                  </div>
+                  <p class="showcase-quote">Cử nhân ngành Femboi học - Fembology <span class="heart">❤️</span>✨</p>
+                </div>
+                <div class="showcase-art-wrap" aria-hidden="true">
+                  <img class="showcase-art" src="./data/waku.jpg" alt="Featured artwork" />
+                  <div class="showcase-art-overlay"></div>
+                </div>
+              </div>
+
+              <!-- Widgets / Apps Grid -->
+              <div class="widgets-header">
+                <h2 class="widgets-title">Widget của Bạn</h2>
+              </div>
+              <div class="apps-grid">
+                <div class="app-card">
+                  <div class="app-icon-wrap genshin"><img src="https://cdn.discordapp.com/emojis/1111630069362868244.webp" alt="Genshin Impact" /></div>
+                  <div class="app-text">
+                    <strong class="app-title">Genshin Impact</strong>
+                    <span class="app-detail">ID: 825707502</span>
+                  </div>
+                </div>
+                <div class="app-card">
+                  <div class="app-icon-wrap minecraft"><span>⛏️</span></div>
+                  <div class="app-text">
+                    <strong class="app-title">Minecraft</strong>
+                    <span class="app-detail">takeshi75</span>
+                  </div>
+                </div>
+                <div class="app-card">
+                  <div class="app-icon-wrap coc"><span>⚔️</span></div>
+                  <div class="app-text">
+                    <strong class="app-title">Clash Of Clans</strong>
+                    <span class="app-detail">VN - Donate</span>
+                  </div>
+                </div>
+                <div class="app-card" onclick="window.open('https://hentaiz.to', '_blank')">
+                  <div class="app-icon-wrap study"><span>📚</span></div>
+                  <div class="app-text">
+                    <strong class="app-title">Học Tập</strong>
+                    <span class="app-detail">210</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: Hoạt động (Realtime Activities) -->
+            <div id="tab-activity" class="tab-content" role="tabpanel">
+              <section id="activity-card" class="activity-card hidden" aria-labelledby="activity-title">
+                <div id="activity-icon" class="activity-icon">✦</div>
+                <div>
+                  <h2 id="activity-title">Hoạt động đang chạy</h2>
+                  <p id="activity-name" class="handle">Không có hoạt động</p>
+                  <p id="activity-detail">Khi có game, Spotify hoặc app đang chạy thì sẽ hiện ở đây.</p>
+                  <p id="activity-time" class="activity-time"></p>
+                </div>
+              </section>
+
+              <div class="realtime-spotify-card">
+                <div class="spotify-header">
+                  <span class="spotify-ico">🎧</span>
+                  <span>Spotify Realtime</span>
+                </div>
+                <strong id="spotify-status" class="spotify-song">Chưa phát hiện</strong>
+              </div>
+            </div>
+
+            <!-- TAB 3: Unity Rich Text Colorizer -->
+            <div id="tab-colorizer" class="tab-content" role="tabpanel">
+              <div class="embedded-tool-header">
+                <h3>Rich Text Colorizer</h3>
+              </div>
+
+              <label class="field-block">
+                <span>Nhập văn bản</span>
+                <textarea id="tc-input-text" rows="3">Takeshi desu</textarea>
+              </label>
+
+              <div class="tool-grid">
+                <label class="field-block">
+                  <span>Hiệu ứng màu</span>
+                  <select id="tc-effect">
+                    <option value="two">Dải hai màu</option>
+                    <option value="mirror">Dải hai màu lặp lại</option>
+                    <option value="three">Dải ba màu</option>
+                    <option value="solid">Một màu</option>
+                    <option value="random">Màu ngẫu nhiên</option>
+                    <option value="rainbow">Cầu vồng</option>
+                  </select>
+                </label>
+                <label class="field-block">
+                  <span>Phông chữ</span>
+                  <select id="tc-font">
+                    <option value="">Mặc định</option><option>Arial</option><option>Verdana</option><option>Tahoma</option><option>Georgia</option><option>Courier New</option><option>Times New Roman</option><option>Trebuchet MS</option><option>Lucida Console</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="color-picks" aria-label="Chọn màu">
+                <label><span>Đầu</span><input id="tc-color-1" type="color" value="#ff4fd8"></label>
+                <label><span>Giữa</span><input id="tc-color-2" type="color" value="#5865f2"></label>
+                <label><span>Cuối</span><input id="tc-color-3" type="color" value="#35e8ff"></label>
+              </div>
+
+              <div class="tool-grid compact">
+                <label class="field-block"><span>Cỡ chữ</span><select id="tc-size"><option value="0">Mặc định</option><option value="12">12</option><option value="18">18</option><option value="24">24</option><option value="30">30</option><option value="36">36</option><option value="48">48</option><option value="60">60</option><option value="72">72</option><option value="90">90</option></select></label>
+                <div class="toggle-row"><label><input id="tc-bold" type="checkbox">Đậm</label><label><input id="tc-italic" type="checkbox">Ngiêng</label><label><input id="tc-word" type="checkbox">Random</label></div>
+              </div>
+
+              <div class="preview-card">
+                <span>Preview</span>
+                <div id="tc-preview" class="tc-preview"></div>
+              </div>
+
+              <label class="field-block output-block">
+                <span>Unity Rich Text</span>
+                <textarea id="tc-output" rows="4" readonly></textarea>
+              </label>
+              <button id="tc-copy" class="copy-btn" type="button">Copy Unity Rich Text</button>
+            </div>
+
+            <!-- TAB 4: Discord Music Bot -->
+            <div id="tab-bot" class="tab-content" role="tabpanel">
+              <div class="embedded-tool-header">
+                <h3 id="bot-page-title">Music Bot Status</h3>
+              </div>
+
+              <div class="bot-hero">
+                <div class="bot-avatar-wrap">
+                  <img id="bot-avatar" class="bot-avatar" src="" alt="Bot avatar">
+                  <span id="bot-status-dot" class="bot-status-dot offline"></span>
+                </div>
+                <div>
+                  <span id="bot-status-text" class="bot-kicker">Đang kết nối API...</span>
+                  <h3 id="bot-display-name">Music Bot</h3>
+                  <p id="bot-custom-status">Đang lấy thông tin bot...</p>
+                </div>
+              </div>
+
+              <div class="bot-actions">
+                <a id="bot-invite-link" class="invite-btn disabled" href="#" target="_blank" rel="noopener noreferrer">Thêm bot vào server</a>
+                <span id="bot-updated-at" class="bot-note">Chưa cập nhật</span>
+              </div>
+
+              <div class="bot-live-grid" aria-label="Music bot live stats">
+                <article><span>Ping</span><strong id="bot-ping">--ms</strong></article>
+                <article><span>Servers</span><strong id="bot-servers">--</strong></article>
+                <article><span>Đang phát</span><strong id="bot-playing">-- phòng</strong></article>
+                <article><span>Kết nối</span><strong id="bot-connected">-- phòng</strong></article>
+                <article class="wide"><span>Runtime</span><strong id="bot-runtime">--</strong></article>
+                <article class="wide"><span>Lavalink</span><strong id="bot-lavalink">--</strong></article>
+              </div>
+
+              <div class="bot-feature-grid">
+                <article><span>01</span><strong>Music-first</strong><p>Tập trung phát nhạc, queue và trải nghiệm nghe gọn nhẹ.</p></article>
+                <article><span>02</span><strong>Realtime status</strong><p>Dữ liệu lấy trực tiếp từ API của source bot đang chạy.</p></article>
+                <article><span>03</span><strong>Server friendly</strong><p>Landing page nhẹ để review và mời bot vào server.</p></article>
+              </div>
+            </div>
+          </main>
         </div>
-
-        <header class="profile-header">
-          <div class="avatar-wrap">
-            <img id="avatar-image" class="avatar-image" src="" alt="Ảnh đại diện Discord" />
-            <div id="avatar-fallback" class="avatar-fallback">T</div>
-            <img id="avatar-decoration" class="avatar-decoration" src="./data/decoration/anime-nani.png"
-              alt="Trang trí avatar" />
-            <span id="status-orb" class="status-orb offline" aria-label="Trạng thái Discord"></span>
-          </div>
-
-          <div class="identity-block">
-            <h1 id="display-name"><span id="profile-typing-name" class="profile-typing-name">Takeshi</span><span class="profile-typing-cursor" aria-hidden="true">|</span></h1>
-            <p class="username">@<span id="username">takeshi</span></p>
-          </div>
-        </header>
-
-        <section class="presence-card" aria-labelledby="presence-title">
-          <div>
-            <h2 id="presence-title">Trạng thái: <span id="custom-status-line">Đang tải...</span></h2>
-            <p id="status-text"><span class="inline-dot"></span>Đang kết nối Discord...</p>
-          </div>
-          <span id="last-updated" class="sync-pill">đang đồng bộ</span>
-        </section>
-
-        <section id="activity-card" class="activity-card hidden" aria-labelledby="activity-title">
-          <div id="activity-icon" class="activity-icon">✦</div>
-          <div>
-            <h2 id="activity-title">Hoạt động</h2>
-            <p id="activity-name" class="handle">Không có hoạt động</p>
-            <p id="activity-detail">Khi có game, Spotify hoặc app đang chạy thì sẽ hiện ở đây.</p>
-            <p id="activity-time" class="activity-time"></p>
-          </div>
-        </section>
-
-        <section class="meta-grid" aria-label="Thông tin realtime Discord">
-          <div><span>Spotify</span><strong id="spotify-status">Chưa phát hiện</strong></div>
-          <div><span>Huy hiệu</span><strong id="public-flags" class="badge-list">Đang tải</strong></div>
-        </section>
-
-        <section class="about-card">
-          <h2>Giới thiệu</h2>
-          <p>Một góc hồ sơ nhỏ gọn của Takeshi, lấy cảm hứng nhẹ từ Discord nhưng vẫn giữ phong cách anime riêng: tối,
-            gọn, mượt và có chiều sâu.</p>
-          <div class="tags" aria-label="Thẻ hồ sơ">
-            <span>Anime</span>
-            <span>Music</span>           
-            <span>Genshin Impact</span>
-            <span>Coder</span>
-            <span>Cheater</span>
-          </div>
-        </section>
-
-        <nav class="social-row" aria-label="Liên kết mạng xã hội">
-          <a id="discord-link" href="https://discord.com/users/648036769769717760" target="_blank" rel="noopener noreferrer" aria-label="Discord" title="Discord">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.32 4.37A19.8 19.8 0 0 0 15.36 2l-.24.44c1.8.55 2.64 1.34 2.64 1.34a16.5 16.5 0 0 0-5.02-1.55 17.1 17.1 0 0 0-4.24.04c-.13 0-.25.03-.38.05-.75.07-2.56.34-4.84 1.36 0 0 .87-.83 2.78-1.38L5.9 2A19.7 19.7 0 0 0 .94 4.42S0 8.1 0 12.7c0 0 1.47 2.52 5.34 2.65 0 0 .65-.78 1.18-1.45-2.24-.67-3.09-2.08-3.09-2.08s.18.13.5.31c.02.02.05.03.08.05.04.03.08.05.12.07.44.25.88.45 1.29.6.72.28 1.58.56 2.59.75 1.33.25 2.9.34 4.6.02.83-.15 1.68-.4 2.57-.75.62-.24 1.31-.58 2.03-1.05 0 0-.88 1.44-3.2 2.1.53.66 1.15 1.42 1.15 1.42 3.88-.13 5.36-2.65 5.36-2.65 0-4.6-.2-8.33-.2-8.33ZM8.2 11.62c-.98 0-1.78-.86-1.78-1.92 0-1.06.78-1.92 1.78-1.92S10 8.64 9.98 9.7c0 1.06-.79 1.92-1.78 1.92Zm7.38 0c-.98 0-1.78-.86-1.78-1.92 0-1.06.79-1.92 1.78-1.92 1 0 1.8.86 1.78 1.92 0 1.06-.78 1.92-1.78 1.92Z"/></svg>
-          </a>
-          <a id="youtube-link" href="http://youtube.com/@takeshi7502" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.52 3.58 12 3.58 12 3.58s-7.52 0-9.4.5A3 3 0 0 0 .5 6.2 31.2 31.2 0 0 0 0 12a31.2 31.2 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.12c1.88.5 9.4.5 9.4.5s7.52 0 9.4-.5a3 3 0 0 0 2.1-2.12A31.2 31.2 0 0 0 24 12a31.2 31.2 0 0 0-.5-5.8ZM9.6 15.55v-7.1L15.85 12 9.6 15.55Z"/></svg>
-          </a>
-          <a id="x-link" href="http://x.com/takeshi7502" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2h3.68l-8.04 9.18L24 22h-7.4l-5.8-7.58L4.17 22H.48l8.6-9.83L0 2h7.6l5.24 6.93L18.9 2Zm-1.3 18.1h2.04L6.5 3.8H4.31L17.6 20.1Z"/></svg>
-          </a>
-          <a id="github-link" href="https://github.com/takeshi7502" target="_blank" rel="noopener noreferrer" aria-label="Github" title="Github">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.38c.6.1.82-.26.82-.58v-2.04c-3.34.73-4.04-1.41-4.04-1.41-.55-1.38-1.34-1.75-1.34-1.75-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.53.12-3.18 0 0 1.01-.32 3.3 1.23a11.4 11.4 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.3c0 .32.22.69.83.57A12 12 0 0 0 12 .5Z"/></svg>
-          </a>
-        </nav>
-
-        <footer class="profile-footer">
-          <a id="page-one-link" href="#">Page 1</a>
-          <a id="page-two-link" href="#">Music Bot</a>
-          <a id="mal-link" href="#">Text color</a>
-        </footer>
-
-        <section id="color-page" class="color-page hidden" aria-label="Unity Rich Text Gradient Generator">
-          <div class="color-page-head">
-            <button id="color-back" class="mini-btn" type="button">← Home</button>
-            <div>
-              <p class="eyebrow">Unity tool</p>
-              <h2>Rich Text Colorizer</h2>
-            </div>
-          </div>
-
-          <label class="field-block">
-            <span>Nhập văn bản</span>
-            <textarea id="tc-input-text" rows="4">Takeshi desu</textarea>
-          </label>
-
-          <div class="tool-grid">
-            <label class="field-block">
-              <span>Hiệu ứng màu</span>
-              <select id="tc-effect">
-                <option value="two">Dải hai màu</option>
-                <option value="mirror">Dải hai màu lặp lại</option>
-                <option value="three">Dải ba màu</option>
-                <option value="solid">Một màu</option>
-                <option value="random">Màu ngẫu nhiên</option>
-                <option value="rainbow">Cầu vồng</option>
-              </select>
-            </label>
-            <label class="field-block">
-              <span>Phông chữ</span>
-              <select id="tc-font">
-                <option value="">Mặc định</option><option>Arial</option><option>Verdana</option><option>Tahoma</option><option>Georgia</option><option>Courier New</option><option>Times New Roman</option><option>Trebuchet MS</option><option>Lucida Console</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="color-picks" aria-label="Chọn màu">
-            <label><span>Đầu</span><input id="tc-color-1" type="color" value="#ff4fd8"></label>
-            <label><span>Giữa</span><input id="tc-color-2" type="color" value="#5865f2"></label>
-            <label><span>Cuối</span><input id="tc-color-3" type="color" value="#35e8ff"></label>
-          </div>
-
-          <div class="tool-grid compact">
-            <label class="field-block"><span>Cỡ chữ</span><select id="tc-size"><option value="0">Mặc định</option><option value="12">12</option><option value="18">18</option><option value="24">24</option><option value="30">30</option><option value="36">36</option><option value="48">48</option><option value="60">60</option><option value="72">72</option><option value="90">90</option></select></label>
-            <div class="toggle-row"><label><input id="tc-bold" type="checkbox">Đậm</label><label><input id="tc-italic" type="checkbox">Ngiêng</label><label><input id="tc-word" type="checkbox">Random</label></div>
-          </div>
-
-          <div class="preview-card">
-            <span>Preview</span>
-            <div id="tc-preview" class="tc-preview"></div>
-          </div>
-
-          <label class="field-block output-block">
-            <span>Unity Rich Text</span>
-            <textarea id="tc-output" rows="6" readonly></textarea>
-          </label>
-          <button id="tc-copy" class="copy-btn" type="button">Copy Unity Rich Text</button>
-        </section>
-
-        <section id="bot-page" class="bot-page hidden" aria-label="Discord Music Bot">
-          <div class="color-page-head">
-            <button id="bot-back" class="mini-btn" type="button">← Home</button>
-            <div>
-              <p class="eyebrow">Discord music bot</p>
-              <h2 id="bot-page-title">Music Bot</h2>
-            </div>
-          </div>
-
-          <div class="bot-hero">
-            <div class="bot-avatar-wrap">
-              <img id="bot-avatar" class="bot-avatar" src="" alt="Bot avatar">
-              <span id="bot-status-dot" class="bot-status-dot offline"></span>
-            </div>
-            <div>
-              <span id="bot-status-text" class="bot-kicker">Đang kết nối API...</span>
-              <h3 id="bot-display-name">Music Bot</h3>
-              <p id="bot-custom-status">Đang lấy thông tin bot...</p>
-            </div>
-          </div>
-
-          <div class="bot-actions">
-            <a id="bot-invite-link" class="invite-btn disabled" href="#" target="_blank" rel="noopener noreferrer">Thêm bot vào server</a>
-            <span id="bot-updated-at" class="bot-note">Chưa cập nhật</span>
-          </div>
-
-          <div class="bot-live-grid" aria-label="Music bot live stats">
-            <article><span>Ping</span><strong id="bot-ping">--ms</strong></article>
-            <article><span>Servers</span><strong id="bot-servers">--</strong></article>
-            <article><span>Đang phát</span><strong id="bot-playing">-- phòng</strong></article>
-            <article><span>Kết nối</span><strong id="bot-connected">-- phòng</strong></article>
-            <article class="wide"><span>Runtime</span><strong id="bot-runtime">--</strong></article>
-            <article class="wide"><span>Lavalink</span><strong id="bot-lavalink">--</strong></article>
-          </div>
-
-          <div class="bot-feature-grid">
-            <article><span>01</span><strong>Music-first</strong><p>Tập trung phát nhạc, queue và trải nghiệm nghe gọn nhẹ.</p></article>
-            <article><span>02</span><strong>Realtime status</strong><p>Dữ liệu lấy trực tiếp từ API của source bot đang chạy.</p></article>
-            <article><span>03</span><strong>Server friendly</strong><p>Landing page nhẹ để review và mời bot vào server.</p></article>
-          </div>
-        </section>
+        <!-- END: Right Widgets Column -->
       </article>
     </section>
   </main>
-
-  <aside id="music-player" class="music-player glass-panel hidden" aria-label="Trình phát nhạc">
-    <button id="play-toggle" class="play-btn" type="button" aria-label="Phát hoặc tạm dừng">▶</button>
-    <button id="next-track" class="next-btn" type="button" aria-label="Chuyển bài tiếp theo">⏭</button>
-    <div class="track-meta">
-      <strong id="track-title">Beautiful Piano Music</strong>
-      <div class="track-time"><span id="current-time">0:00</span><span id="duration-time">0:00</span></div>
-      <div class="progress"><span id="progress-bar"></span></div>
-    </div>
-    <div id="volume-control" class="volume-control" aria-label="Âm lượng nhạc">
-      <button id="volume-toggle" class="volume-toggle" type="button" aria-label="Mở chỉnh âm lượng">🔊</button>
-      <input id="volume-slider" type="range" min="0" max="100" value="50" aria-label="Chỉnh âm lượng nhạc" />
-    </div>
-    <div class="visualizer" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-    <audio id="audio-player" src="./data/music/2%20Hour%20Beautiful%20Piano%20Music.mp3" preload="auto"></audio>
-  </aside>
 
   <script src="script.js"></script>
 </body>
