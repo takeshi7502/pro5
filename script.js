@@ -31,6 +31,8 @@ const presenceEls = {
   statusText: document.getElementById('status-text'),
   customStatusLine: document.getElementById('custom-status-line'),
   updated: document.getElementById('last-updated'),
+  clientPlatformText: document.getElementById('client-platform-text'),
+  clientPlatformBtn: document.getElementById('client-platform-btn'),
   activityCard: document.getElementById('activity-card'),
   activityIcon: document.getElementById('activity-icon'),
   activityName: document.getElementById('activity-name'),
@@ -163,6 +165,9 @@ function showScreen(screen) {
   [terminalScreen, profileScreen].forEach((item) => item.classList.remove('active'));
   screen.classList.add('active');
   document.body.classList.toggle('terminal-active', screen === terminalScreen);
+  if (screen === profileScreen && typeof syncPanelPlacement === 'function') {
+    syncPanelPlacement();
+  }
 }
 
 function typeTextForTab(tab, text, speed = 14, onDone = () => {}) {
@@ -502,7 +507,16 @@ async function fetchDiscordPresence() {
     profileTypingWords[0] = user.global_name || user.display_name || 'Takeshi';
     presenceEls.username.textContent = user.username || 'takeshi';
     presenceEls.customStatusLine.textContent = customStatusText || '...';
-    presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>${statusLabel}${clientText ? ` - ${clientText}` : ''}`;
+    presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>${statusLabel}`;
+    const platformDisplay = clientText || (status === 'offline' ? 'Offline' : 'Online');
+    presenceEls.clientPlatformText.textContent = platformDisplay;
+    if (presenceEls.clientPlatformBtn) {
+      const svgDot = presenceEls.clientPlatformBtn.querySelector('svg circle');
+      if (svgDot) {
+        const colors = { online: '#3ee87d', idle: '#f0b232', dnd: '#f45b69', offline: '#80848e' };
+        svgDot.setAttribute('fill', colors[status] || colors.offline);
+      }
+    }
     updateVietnamClock();
     if (avatarUrl) presenceEls.avatar.src = avatarUrl;
 
@@ -514,7 +528,12 @@ async function fetchDiscordPresence() {
     console.warn('Unable to retrieve Discord presence:', error);
     const status = setStatusClass('offline');
     presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>Chưa thể đồng bộ Discord`;
-    presenceEls.customStatusLine.textContent = 'Không rõ';
+    presenceEls.customStatusLine.textContent = '...';
+    presenceEls.clientPlatformText.textContent = 'Offline';
+    if (presenceEls.clientPlatformBtn) {
+      const svgDot = presenceEls.clientPlatformBtn.querySelector('svg circle');
+      if (svgDot) svgDot.setAttribute('fill', '#80848e');
+    }
     updateVietnamClock();
     presenceEls.spotifyStatus.textContent = 'Không rõ';
     presenceEls.publicFlags.innerHTML = '<span class="discord-badge empty">Không rõ</span>';
@@ -530,6 +549,7 @@ function rotateDecoration() {
 setInterval(rotateDecoration, 5000);
 
 function enterConsole() {
+  if (introTimer) clearInterval(introTimer);
   showScreen(profileScreen);
 }
 
@@ -954,24 +974,115 @@ if (interactiveCard) {
   });
 }
 
-// Panel Toggle (Collapse / Expand right widgets panel)
+// Panel Toggle (Collapse / Expand right widgets panel & Mobile Bottom Sheet)
 const panelToggleBtn = document.getElementById('panelToggleBtn');
 const rightPanelContainer = document.getElementById('rightPanelContainer');
+const mobilePanelBackdrop = document.getElementById('mobilePanelBackdrop');
+const closeMobilePanelBtn = document.getElementById('closeMobilePanelBtn');
+
+function syncPanelPlacement() {
+  const isMobile = window.innerWidth <= 880;
+  if (!interactiveCard || !profileScreen || !rightPanelContainer) return;
+
+  if (isMobile) {
+    if (rightPanelContainer.parentElement !== profileScreen) {
+      profileScreen.appendChild(rightPanelContainer);
+    }
+  } else {
+    if (rightPanelContainer.parentElement !== interactiveCard) {
+      interactiveCard.appendChild(rightPanelContainer);
+    }
+  }
+}
+
+window.addEventListener('resize', () => {
+  syncPanelPlacement();
+  if (window.innerWidth > 880) {
+    document.body.classList.remove('mobile-panel-open');
+    mobilePanelBackdrop?.classList.remove('active');
+  }
+});
+syncPanelPlacement();
+
+function setPanelState(collapsed) {
+  if (!rightPanelContainer) return;
+  syncPanelPlacement();
+  rightPanelContainer.classList.toggle('collapsed', collapsed);
+  interactiveCard?.classList.toggle('collapsed', collapsed);
+  panelToggleBtn?.classList.toggle('is-collapsed', collapsed);
+  mobilePanelBackdrop?.classList.toggle('active', !collapsed);
+
+  if (collapsed) {
+    panelToggleBtn?.setAttribute('title', 'Mở rộng bảng');
+    panelToggleBtn?.setAttribute('aria-label', 'Mở rộng bảng');
+    document.body.classList.remove('mobile-panel-open');
+  } else {
+    panelToggleBtn?.setAttribute('title', 'Thu gọn bảng');
+    panelToggleBtn?.setAttribute('aria-label', 'Thu gọn bảng');
+    if (window.innerWidth <= 880) {
+      document.body.classList.add('mobile-panel-open');
+    }
+  }
+}
 
 if (panelToggleBtn && rightPanelContainer) {
   panelToggleBtn.addEventListener('click', () => {
-    const isCollapsed = rightPanelContainer.classList.toggle('collapsed');
-    interactiveCard?.classList.toggle('collapsed', isCollapsed);
-    panelToggleBtn.classList.toggle('is-collapsed', isCollapsed);
-    if (isCollapsed) {
-      panelToggleBtn.setAttribute('title', 'Mở rộng bảng');
-      panelToggleBtn.setAttribute('aria-label', 'Mở rộng bảng');
-    } else {
-      panelToggleBtn.setAttribute('title', 'Thu gọn bảng');
-      panelToggleBtn.setAttribute('aria-label', 'Thu gọn bảng');
-    }
+    const isCurrentlyCollapsed = rightPanelContainer.classList.contains('collapsed');
+    setPanelState(!isCurrentlyCollapsed);
   });
 }
+
+if (closeMobilePanelBtn) {
+  closeMobilePanelBtn.addEventListener('click', () => {
+    setPanelState(true);
+  });
+}
+
+if (mobilePanelBackdrop) {
+  mobilePanelBackdrop.addEventListener('click', () => {
+    setPanelState(true);
+  });
+}
+
+// ESC key closes panel if open
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && rightPanelContainer && !rightPanelContainer.classList.contains('collapsed')) {
+    setPanelState(true);
+  }
+});
+
+// Mobile drag handle swipe down to close
+const dragHandle = document.querySelector('.mobile-drag-handle');
+const mobileHeader = document.querySelector('.mobile-panel-header');
+let touchStartY = 0;
+let touchDiffY = 0;
+
+[dragHandle, mobileHeader].forEach((el) => {
+  if (!el) return;
+  el.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+    touchDiffY = 0;
+  }, { passive: true });
+
+  el.addEventListener('touchmove', (e) => {
+    const currentY = e.touches[0].clientY;
+    touchDiffY = currentY - touchStartY;
+    if (touchDiffY > 0 && rightPanelContainer && window.innerWidth <= 880) {
+      rightPanelContainer.style.transform = `translateY(${touchDiffY}px)`;
+    }
+  }, { passive: true });
+
+  el.addEventListener('touchend', () => {
+    if (rightPanelContainer) {
+      rightPanelContainer.style.transform = '';
+    }
+    if (touchDiffY > 70) {
+      setPanelState(true);
+    }
+    touchStartY = 0;
+    touchDiffY = 0;
+  });
+});
 
 // Navigation Tabs Switching
 const navTabBtns = document.querySelectorAll('.nav-tab-btn');

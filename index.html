@@ -64,6 +64,8 @@
               <div class="custom-status-pill" title="Custom status">
                 <span id="custom-status-line">u gay</span>
               </div>
+
+              <span id="last-updated" class="sync-clock">VN --:--:--</span>
             </div>
 
             <div class="identity-section">
@@ -72,9 +74,12 @@
                 <span class="username">@<span id="username">takeshi7502</span></span>
                 <span class="dot-sep">•</span>
                 <span class="server-badge" title="Server Tag"><span class="badge-ico">💮</span><span>KFS</span></span>
-                <span id="last-updated" class="sync-clock">VN --:--:--</span>
+                <button id="client-platform-btn" class="client-platform-btn" type="button" title="Nền tảng Discord">
+                  <svg viewBox="0 0 24 24" width="8" height="8" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="#80848e"/></svg>
+                  <span id="client-platform-text">Đang kết nối...</span>
+                </button>
               </div>
-              <p id="status-text" class="status-subtext"><span class="inline-dot offline"></span>Đang kết nối Discord...</p>
+              <p id="status-text" class="status-subtext" hidden><span class="inline-dot offline"></span>Đang kết nối Discord...</p>
             </div>
 
             <div id="public-flags" class="badge-list" aria-label="Huy hiệu hồ sơ"></div>
@@ -142,6 +147,18 @@
 
         <!-- BEGIN: Right Widgets Column -->
         <div id="rightPanelContainer" class="right-panel-container collapsed">
+          <!-- Mobile Sheet Header -->
+          <div class="mobile-panel-header">
+            <div class="mobile-drag-handle"></div>
+            <div class="mobile-header-bar">
+              <button id="closeMobilePanelBtn" class="mobile-panel-close-btn" type="button" aria-label="Đóng bảng" title="Đóng bảng">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
           <main class="right-widgets-inner" aria-label="Nội dung chi tiết">
             <!-- Navigation Tabs -->
             <nav class="widgets-nav-tabs" role="tablist">
@@ -151,6 +168,10 @@
               </button>
               <button class="nav-tab-btn" data-tab="activity" type="button" role="tab" aria-selected="false">
                 Hoạt động
+                <span class="tab-indicator"></span>
+              </button>
+              <button class="nav-tab-btn" data-tab="websites" type="button" role="tab" aria-selected="false">
+                Trang web
                 <span class="tab-indicator"></span>
               </button>
               <button class="nav-tab-btn" data-tab="colorizer" type="button" role="tab" aria-selected="false">
@@ -236,6 +257,45 @@
                   <span>Spotify Realtime</span>
                 </div>
                 <strong id="spotify-status" class="spotify-song">Chưa phát hiện</strong>
+              </div>
+            </div>
+
+            <!-- TAB: Trang web -->
+            <div id="tab-websites" class="tab-content" role="tabpanel">
+              <div class="widgets-header">
+                <h2 class="widgets-title">My Website</h2>
+              </div>
+              <div class="websites-list">
+                <a class="website-card" href="https://5gtiktok.takeshi.dev/" target="_blank" rel="noopener noreferrer">
+                  <div class="website-icon-wrap">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6.5a4.5 4.5 0 014.5-4.5M8 12a4 4 0 108 0 4 4 0 00-8 0z"/><path d="M16 8.5A4.5 4.5 0 0120.5 4"/></svg>
+                  </div>
+                  <div class="website-info">
+                    <strong class="website-name">Free 5G TikTok</strong>
+                    <span class="website-desc">Vless Server miễn phí Data 4G/5G nền Tiktok, Vina ko nền.</span>
+                  </div>
+                  <svg class="website-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+                </a>
+                <a class="website-card" href="https://domain.takeshi.dev/" target="_blank" rel="noopener noreferrer">
+                  <div class="website-icon-wrap">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                  </div>
+                  <div class="website-info">
+                    <strong class="website-name">Free Subdomain</strong>
+                    <span class="website-desc">Đăng ký subdomain miễn phí cho project cá nhân của bạn.</span>
+                  </div>
+                  <svg class="website-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+                </a>
+                <a class="website-card" href="https://lavalink.takeshi.dev/" target="_blank" rel="noopener noreferrer">
+                  <div class="website-icon-wrap">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                  </div>
+                  <div class="website-info">
+                    <strong class="website-name">Lavalink Server</strong>
+                    <span class="website-desc">Server phát nhạc Lavalink cho Discord Bot.</span>
+                  </div>
+                  <svg class="website-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
+                </a>
               </div>
             </div>
 
@@ -335,6 +395,8 @@
         </div>
         <!-- END: Right Widgets Column -->
       </article>
+      <!-- Mobile Panel Backdrop -->
+      <div id="mobilePanelBackdrop" class="mobile-panel-backdrop"></div>
     </section>
   </main>
 
