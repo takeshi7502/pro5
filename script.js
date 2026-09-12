@@ -307,10 +307,9 @@ function getDiscordDecorationUrls(user) {
   const asset = user?.avatar_decoration_data?.asset;
   if (!asset) return [];
   const normalized = asset.replace(/^avatar-decoration-presets\//, '');
-  const ext = normalized.startsWith('a_') ? 'gif' : 'png';
   return [
-    `https://cdn.discordapp.com/avatar-decoration-presets/${normalized}.${ext}?size=240&passthrough=true`,
     `https://cdn.discordapp.com/avatar-decoration-presets/${normalized}.png?size=240&passthrough=true`,
+    `https://cdn.discordapp.com/avatar-decoration-presets/${normalized}.png?size=96&passthrough=true`,
   ];
 }
 
@@ -380,27 +379,108 @@ function updateActivityCard(activity) {
   presenceEls.activityTime.textContent = activity.time;
 }
 
-const staticDiscordBadges = [
-  { name: 'HypeSquad Lỗi Lạc', icon: './data/badges/hypesquad-brilliance.svg' },
-  { name: 'Nhà Phát Triển Tích Cực', icon: './data/badges/active-developer.svg' },
-  { name: 'Đăng ký từ 8 thg 12, 2022', icon: './data/badges/nitro-new.svg', nitro: true },
-  { name: 'Nitro Boost', icon: './data/badges/boost-6-month.svg', nitro: true },
-  { name: 'takeshi#7502', icon: './data/badges/legacy-username.svg' },
+const clanBadge = document.getElementById('clan-badge');
+const clanBadgeIcon = document.getElementById('clan-badge-icon');
+const clanBadgeTag = document.getElementById('clan-badge-tag');
+
+const discordBadgeFlags = [
+  { bit: 1 << 0, label: 'Nhân viên Discord (Discord Staff)', icon: './data/badges/discord-staff.svg' },
+  { bit: 1 << 1, label: 'Chủ sở hữu máy chủ đối tác (Partnered Server Owner)', icon: './data/badges/discord-partner.svg' },
+  { bit: 1 << 2, label: 'HypeSquad Events Coordinator', icon: './data/badges/hypesquad-event.svg' },
+  { bit: 1 << 3, label: 'Thợ săn lỗi cấp 1 (Bug Hunter Level 1)', icon: './data/badges/bug-hunter-lv1.svg' },
+  { bit: 1 << 6, label: 'HypeSquad Dũng Cảm (Bravery)', icon: './data/badges/hypesquad-bravery.svg' },
+  { bit: 1 << 7, label: 'HypeSquad Lỗi Lạc (Brilliance)', icon: './data/badges/hypesquad-brilliance.svg' },
+  { bit: 1 << 8, label: 'HypeSquad Cân Bằng (Balance)', icon: './data/badges/hypesquad-balance.svg' },
+  { bit: 1 << 9, label: 'Người ủng hộ sớm (Early Supporter)', icon: './data/badges/early-supporter.svg' },
+  { bit: 1 << 14, label: 'Thợ săn lỗi cấp 2 (Bug Hunter Level 2)', icon: './data/badges/bug-hunter-lv2.svg' },
+  { bit: 1 << 17, label: 'Nhà phát triển bot xác minh sớm (Early Verified Bot Developer)', icon: './data/badges/early-verified-bot-developer.svg' },
+  { bit: 1 << 18, label: 'Điều hành viên được chứng nhận (Discord Certified Moderator)', icon: './data/badges/discord-certified-moderator.svg' },
+  { bit: 1 << 22, label: 'Nhà phát triển tích cực (Active Developer)', icon: './data/badges/active-developer.svg' },
 ];
 
-function renderDiscordBadges() {
-  presenceEls.publicFlags.innerHTML = staticDiscordBadges.map((badge) => `
+function renderDiscordBadges(user) {
+  if (!presenceEls.publicFlags) return;
+  const flags = Number(user?.public_flags) || 0;
+  const badges = [];
+
+  // 1. Bitfield badges decoded from public_flags
+  for (const badge of discordBadgeFlags) {
+    if ((flags & badge.bit) === badge.bit) {
+      badges.push({ name: badge.label, icon: badge.icon, nitro: false });
+    }
+  }
+
+  // 2. Discord Nitro badge (detected from avatar decoration or animated avatar)
+  const hasNitro = Boolean(
+    user?.avatar_decoration_data ||
+    user?.avatar?.startsWith('a_') ||
+    user?.banner?.startsWith('a_')
+  );
+
+  if (hasNitro) {
+    badges.push({
+      name: 'Thuê bao Discord Nitro',
+      icon: './data/badges/nitro-new.svg',
+      nitro: true,
+    });
+    badges.push({
+      name: 'Server Booster',
+      icon: './data/badges/boost-6-month.svg',
+      nitro: true,
+    });
+  }
+
+  // 3. Legacy Username badge
+  if (user?.discriminator === '0' || user?.username) {
+    const legacyName = user?.username ? `${user.username}#7502` : 'takeshi#7502';
+    badges.push({
+      name: `Nguyên bản là ${legacyName}`,
+      icon: './data/badges/legacy-username.svg',
+      nitro: false,
+    });
+  }
+
+  if (!badges.length) {
+    presenceEls.publicFlags.innerHTML = '<span class="discord-badge empty">Không có huy hiệu</span>';
+    return;
+  }
+
+  presenceEls.publicFlags.innerHTML = badges.map((badge) => `
     <span class="discord-badge ${badge.nitro ? 'nitro' : ''}" data-tooltip="${badge.name}" aria-label="${badge.name}">
       <img src="${badge.icon}" alt="${badge.name}">
     </span>
   `).join('');
 }
 
-function updateMetaFields(data) {
+function updateClanBadge(primaryGuild) {
+  if (!clanBadge) return;
+  if (primaryGuild && primaryGuild.tag && primaryGuild.identity_enabled !== false) {
+    clanBadge.style.display = 'inline-flex';
+    if (clanBadgeTag) clanBadgeTag.textContent = primaryGuild.tag;
+
+    if (primaryGuild.badge && primaryGuild.identity_guild_id) {
+      const badgeUrl = `https://cdn.discordapp.com/clan-badges/${primaryGuild.identity_guild_id}/${primaryGuild.badge}.png?size=32`;
+      if (clanBadgeIcon) {
+        clanBadgeIcon.src = badgeUrl;
+        clanBadgeIcon.style.display = 'inline-block';
+      }
+    } else if (clanBadgeIcon) {
+      clanBadgeIcon.style.display = 'none';
+    }
+
+    clanBadge.title = `Clan: ${primaryGuild.tag} (Guild ID: ${primaryGuild.identity_guild_id || ''})`;
+    clanBadge.dataset.guildId = primaryGuild.identity_guild_id || '';
+  } else {
+    clanBadge.style.display = 'none';
+  }
+}
+
+function updateMetaFields(data, user) {
   presenceEls.spotifyStatus.textContent = data.listening_to_spotify && data.spotify
     ? `${data.spotify.song || 'Spotify'} · ${data.spotify.artist || 'Unknown'}`
     : 'Chưa phát hiện';
-  renderDiscordBadges();
+  renderDiscordBadges(user);
+  updateClanBadge(user?.primary_guild);
 }
 
 function setLocalDecoration() {
