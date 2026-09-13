@@ -661,6 +661,7 @@ const colorTool = {
 };
 
 const BOT_STATUS_ENDPOINTS = [
+  'http://musicbot-api.takeshi.dev:3000/api/public-status',
   'https://musicbot-api.takeshi.dev/api/public-status',
   'http://localhost:3000/api/public-status',
   'http://127.0.0.1:3000/api/public-status',
