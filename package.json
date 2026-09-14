@@ -1,0 +1,25 @@
+{
+  "name": "takeshi-pro5",
+  "version": "1.0.0",
+  "description": "Takeshi Cyber Profile - A premium cyber-anime personal profile with Windows CMD intro and Discord-style presence",
+  "main": "script.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "test": "echo \"No tests specified\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/takeshi7502/pro5.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/takeshi7502/pro5/issues"
+  },
+  "homepage": "https://github.com/takeshi7502/pro5#readme",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
