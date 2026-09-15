@@ -1,0 +1,13 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/favicon.ico",
+      "destination": "/data/favicon/favicon.ico"
+    },
+    {
+      "source": "/apple-touch-icon.png",
+      "destination": "/data/favicon/apple-touch-icon.png"
+    }
+  ]
+}

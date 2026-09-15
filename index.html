@@ -4,17 +4,85 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Takeshi | pro5</title>
+  <title>Takeshi – Trang cá nhân &amp; Dự án | takeshi.dev</title>
   <meta name="description"
-    content="Oh... yo bro? đây cũng ko có gì hay cả, nếu muốn có thể xem thử." />
+    content="Trang cá nhân chính thức của Takeshi (takeshi.dev) – Không gian chia sẻ các dự án lập trình, Discord Bot, hoạt động realtime và phong cách anime độc đáo." />
+  <meta name="keywords" content="Takeshi, takeshi dev, takeshi7502, lập trình, discord bot, anime, profile, portfolio" />
+  <meta name="author" content="Takeshi" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="canonical" href="https://takeshi.dev/" />
   <meta name="theme-color" content="#070a15" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://takeshi.dev/" />
+  <meta property="og:site_name" content="Takeshi Dev" />
+  <meta property="og:title" content="Takeshi – Trang cá nhân &amp; Dự án" />
+  <meta property="og:description"
+    content="Trang cá nhân chính thức của Takeshi (takeshi.dev) – Không gian chia sẻ các dự án lập trình, Discord Bot, hoạt động realtime và phong cách anime độc đáo." />
+  <meta property="og:image" content="https://takeshi.dev/data/waku.jpg" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@takeshi7502" />
+  <meta name="twitter:creator" content="@takeshi7502" />
+  <meta name="twitter:title" content="Takeshi – Trang cá nhân &amp; Dự án" />
+  <meta name="twitter:description"
+    content="Trang cá nhân chính thức của Takeshi (takeshi.dev) – Không gian chia sẻ các dự án lập trình, Discord Bot, hoạt động realtime và phong cách anime độc đáo." />
+  <meta name="twitter:image" content="https://takeshi.dev/data/waku.jpg" />
+
+  <!-- Google & Browser Favicons -->
+  <link rel="icon" type="image/x-icon" href="./data/favicon/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="48x48" href="./data/favicon/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./data/favicon/favicon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./data/favicon/apple-touch-icon.png" />
+
+  <!-- Structured Data: WebSite & ProfilePage (Schema.org JSON-LD for Google Rich Snippets) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://takeshi.dev/#website",
+        "url": "https://takeshi.dev/",
+        "name": "Takeshi Dev",
+        "alternateName": ["Takeshi", "takeshi.dev", "Takeshi Profile"],
+        "description": "Trang cá nhân chính thức của Takeshi – Lập trình viên & Anime Enthusiast.",
+        "inLanguage": "vi"
+      },
+      {
+        "@type": "ProfilePage",
+        "@id": "https://takeshi.dev/#profilepage",
+        "url": "https://takeshi.dev/",
+        "name": "Takeshi – Trang cá nhân & Dự án",
+        "isPartOf": { "@id": "https://takeshi.dev/#website" },
+        "mainEntity": {
+          "@type": "Person",
+          "@id": "https://takeshi.dev/#author",
+          "name": "Takeshi",
+          "alternateName": "takeshi7502",
+          "url": "https://takeshi.dev/",
+          "image": "https://takeshi.dev/data/waku.jpg",
+          "sameAs": [
+            "https://github.com/takeshi7502",
+            "https://steamcommunity.com/id/takeshi7502/",
+            "http://youtube.com/@takeshi7502",
+            "http://x.com/takeshi7502",
+            "https://discord.com/users/648036769769717760"
+          ]
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
-  <link rel="icon" href="https://cdn.discordapp.com/emojis/1111630069362868244.webp" />
 
   <!-- Vercel Web Analytics -->
   <script>
@@ -34,7 +102,7 @@
   <div class="scanlines" aria-hidden="true"></div>
 
   <main id="app-root">
-    <section id="terminal-screen" class="screen terminal-screen active" aria-label="Windows 11 command prompt intro">
+    <section id="terminal-screen" class="screen terminal-screen active" data-nosnippet aria-label="Windows 11 command prompt intro">
       <div class="cmd-window">
         <div class="cmd-titlebar">
           <div id="cmd-tabs" class="cmd-tabs" role="tablist" aria-label="CMD tabs"></div>
