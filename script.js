@@ -1222,8 +1222,8 @@ navTabBtns.forEach((btn) => {
 
 // URL DYNAMIC ANIMATION ENGINE
 const urlAnimator = {
-  mode: 'trace', // 'trace', 'matrix', 'signal', 'marquee', 'anime', 'cycle', 'off'
-  cycleModes: ['trace', 'matrix', 'signal', 'marquee', 'anime'],
+  mode: 'anime', // 'anime', 'trace', 'matrix', 'signal', 'marquee', 'cycle', 'off'
+  cycleModes: ['anime', 'trace', 'matrix', 'signal', 'marquee'],
   cycleIndex: 0,
   cycleTimer: null,
   timer: null,
@@ -1284,6 +1284,7 @@ const urlAnimator = {
 
   start() {
     this.stop();
+    this.updateBtnUI();
     if (this.mode === 'off') return;
     this.timer = setInterval(() => this.tick(), this.interval);
     if (this.mode === 'cycle') {
@@ -1321,7 +1322,7 @@ const urlAnimator = {
   },
 
   nextMode() {
-    const list = ['trace', 'matrix', 'signal', 'marquee', 'anime', 'cycle', 'off'];
+    const list = ['anime', 'trace', 'matrix', 'signal', 'marquee', 'cycle', 'off'];
     const idx = list.indexOf(this.mode);
     const next = list[(idx + 1) % list.length];
     this.setMode(next);
@@ -1329,6 +1330,19 @@ const urlAnimator = {
 
   updateBtnUI() {
     const btnLabel = document.getElementById('url-effect-label');
+    const btnIco = document.querySelector('#url-effect-btn .url-badge-ico');
+    const icons = {
+      anime: '🌸',
+      trace: '⚡',
+      matrix: '🟩',
+      signal: '📶',
+      marquee: '📜',
+      cycle: '🔄',
+      off: '⏹️',
+    };
+    if (btnIco && icons[this.mode]) {
+      btnIco.textContent = icons[this.mode];
+    }
     if (btnLabel) {
       if (this.mode === 'cycle') {
         const current = this.getCurrentMode().toUpperCase();
