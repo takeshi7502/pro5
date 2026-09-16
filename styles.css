@@ -189,6 +189,10 @@ body.color-page-active .profile-console { margin-top:0; }
 .client-platform-btn { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.04); color: #c0cde8; font-size: 11px; font-weight: 600; cursor: default; transition: all 0.2s ease; white-space: nowrap; }
 .client-platform-btn svg { flex-shrink: 0; }
 .client-platform-btn:hover { background: rgba(88, 101, 242, 0.15); border-color: rgba(88, 101, 242, 0.35); color: #fff; }
+.url-effect-btn { margin-left: 0 !important; cursor: pointer; user-select: none; transition: all 0.2s ease; }
+.url-effect-btn:hover { background: rgba(88, 101, 242, 0.25); border-color: rgba(88, 101, 242, 0.5); color: #fff; transform: translateY(-1px); }
+.url-effect-btn:active { transform: translateY(0); }
+.url-badge-ico { font-size: 10px; line-height: 1; display: inline-block; }
 
 .inline-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; background: #80848e; flex-shrink: 0; }
 .inline-dot.online { background: var(--green); box-shadow: 0 0 12px rgba(62,232,125,.5); }

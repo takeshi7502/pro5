@@ -244,11 +244,35 @@ function normalizeUrl(value) {
 
 function fakeCommand(command) {
   const lower = command.toLowerCase();
-  if (['help', '?'].includes(lower)) return 'Available: help, clear, profile, status, ping, dir, scan, run <anything>, or paste a URL.';
+  if (['help', '?'].includes(lower)) return 'Available: help, clear, profile, status, ping, dir, url, scan, run <anything>, or paste a URL.';
   if (lower === 'profile') return 'Opening Takeshi profile interface... done. Press Enter outside this input to continue.';
   if (lower === 'status') return 'Discord presence daemon: ONLINE\nAnime energy: 98%\nCute cursor: armed.';
   if (lower === 'ping') return 'Pinging moonlight.anime [127.0.0.1]... Reply: time=7ms TTL=uwu';
   if (lower === 'dir') return ' Directory of C:\\Users\\Takeshi\n\n<DIR> anime\n<DIR> lofi\n<DIR> secrets\nprofile.exe';
+  if (lower === 'url' || lower.startsWith('url ')) {
+    const parts = command.trim().split(/\s+/);
+    const sub = parts[1]?.toLowerCase();
+    if (!sub) {
+      return [
+        '=== URL ANIMATION ENGINE ===',
+        `Chế độ hiện tại: [ ${urlAnimator.mode.toUpperCase()} ]`,
+        '',
+        'Các kiểu URL thanh địa chỉ:',
+        '  url trace    -> Mã Hex Cyber Trace (?i=1&sys_trace=0x...)',
+        '  url matrix   -> Thanh tiến trình khối vuông (?load=[■■■□□])',
+        '  url signal   -> Cột sóng realtime (?status=ONLINE&sig=▂▄▆█)',
+        '  url marquee  -> Dòng chữ cuộn Terminal',
+        '  url anime    -> Biểu cảm Kaomoji nhấp nháy (?mood=(^._.^))',
+        '  url cycle    -> Tự động luân chuyển giữa các kiểu',
+        '  url off      -> Tắt hiệu ứng URL',
+      ].join('\n');
+    }
+    if (['trace', 'matrix', 'signal', 'marquee', 'anime', 'cycle', 'off'].includes(sub)) {
+      urlAnimator.setMode(sub);
+      return `[OK] Đã chuyển hiệu ứng URL sang: "${sub.toUpperCase()}". Hãy nhìn lên thanh URL trình duyệt! ✦`;
+    }
+    return `[!] Không nhận diện được kiểu "${sub}". Gõ "url" để xem danh sách.`;
+  }
   if (lower.startsWith('run ') || lower.startsWith('npm ') || lower.startsWith('python ') || lower.startsWith('git ')) {
     return `Executing "${command}"...\n[OK] Pretending very professionally. No errors found.`;
   }
@@ -1195,3 +1219,143 @@ navTabBtns.forEach((btn) => {
     }
   });
 });
+
+// URL DYNAMIC ANIMATION ENGINE
+const urlAnimator = {
+  mode: 'trace', // 'trace', 'matrix', 'signal', 'marquee', 'anime', 'cycle', 'off'
+  cycleModes: ['trace', 'matrix', 'signal', 'marquee', 'anime'],
+  cycleIndex: 0,
+  cycleTimer: null,
+  timer: null,
+  step: 0,
+  interval: 220,
+
+  modes: {
+    trace(step) {
+      const hex = '0x' + Math.floor(Math.random() * 0xFFFFFFFF).toString(16).toUpperCase().padStart(8, '0');
+      return `?i=1&sys_trace=${hex}`;
+    },
+    matrix(step) {
+      const frames = ['[■□□□□]', '[■■□□□]', '[■■■□□]', '[■■■■□]', '[■■■■■]', '[□■■■■]', '[□□■■■]', '[□□□■■]', '[□□□□■]'];
+      const bar = frames[step % frames.length];
+      return `?sys=takeshi&load=${encodeURIComponent(bar)}`;
+    },
+    signal(step) {
+      const waves = [' ▂', ' ▂▃', ' ▂▃▄', '▂▃▄▅', '▃▄▅▆', '▄▅▆▇', '▅▆▇█', '▆▇██', '████'];
+      const sig = waves[step % waves.length];
+      const ping = 12 + (step % 7) * 3;
+      return `?status=ONLINE&sig=${encodeURIComponent(sig)}&ping=${ping}ms`;
+    },
+    marquee(step) {
+      const text = '─── TAKESHI.DEV ✦ FREELANCER ✦ ANIME PROFILE ─── ';
+      const offset = step % text.length;
+      const part = text.slice(offset) + text.slice(0, offset);
+      return `?console=${encodeURIComponent(part.slice(0, 18).trim())}`;
+    },
+    anime(step) {
+      const faces = ['(｡•̀ᴗ-)✧', '(≧◡≦)', '(づ｡◕‿‿◕｡)づ', '(^._.^)ﾉ', '(ง°ل͜°)ง', '( ˘ ³˘)♥', '(✦ω✦)'];
+      const face = faces[Math.floor(step / 3) % faces.length];
+      return `?mood=${encodeURIComponent(face)}`;
+    },
+    off() {
+      return '';
+    },
+  },
+
+  getCurrentMode() {
+    if (this.mode === 'cycle') {
+      return this.cycleModes[this.cycleIndex % this.cycleModes.length];
+    }
+    return this.mode;
+  },
+
+  tick() {
+    this.step += 1;
+    const activeMode = this.getCurrentMode();
+    const generator = this.modes[activeMode];
+    if (!generator) return;
+    const query = generator(this.step);
+    const base = window.location.pathname || '/';
+    const newUrl = query ? `${base}${query}` : base;
+    try {
+      window.history.replaceState(null, '', newUrl);
+    } catch (e) {}
+  },
+
+  start() {
+    this.stop();
+    if (this.mode === 'off') return;
+    this.timer = setInterval(() => this.tick(), this.interval);
+    if (this.mode === 'cycle') {
+      this.cycleTimer = setInterval(() => {
+        this.cycleIndex = (this.cycleIndex + 1) % this.cycleModes.length;
+        this.updateBtnUI();
+      }, 7000);
+    }
+  },
+
+  stop() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+    if (this.cycleTimer) {
+      clearInterval(this.cycleTimer);
+      this.cycleTimer = null;
+    }
+    try {
+      window.history.replaceState(null, '', window.location.pathname || '/');
+    } catch (e) {}
+  },
+
+  setMode(newMode) {
+    if (this.modes[newMode] || newMode === 'cycle') {
+      this.mode = newMode;
+      this.updateBtnUI();
+      if (newMode === 'off') {
+        this.stop();
+      } else {
+        this.start();
+      }
+    }
+  },
+
+  nextMode() {
+    const list = ['trace', 'matrix', 'signal', 'marquee', 'anime', 'cycle', 'off'];
+    const idx = list.indexOf(this.mode);
+    const next = list[(idx + 1) % list.length];
+    this.setMode(next);
+  },
+
+  updateBtnUI() {
+    const btnLabel = document.getElementById('url-effect-label');
+    if (btnLabel) {
+      if (this.mode === 'cycle') {
+        const current = this.getCurrentMode().toUpperCase();
+        btnLabel.textContent = `CYC (${current})`;
+      } else {
+        btnLabel.textContent = this.mode.toUpperCase();
+      }
+    }
+  },
+};
+
+// URL Effect Button click handler
+const urlEffectBtn = document.getElementById('url-effect-btn');
+if (urlEffectBtn) {
+  urlEffectBtn.addEventListener('click', () => {
+    urlAnimator.nextMode();
+  });
+}
+
+// Pause animation when browser tab is inactive to save performance
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (urlAnimator.timer) clearInterval(urlAnimator.timer);
+  } else if (urlAnimator.mode !== 'off') {
+    urlAnimator.start();
+  }
+});
+
+// Boot URL animation
+urlAnimator.start();
