@@ -879,18 +879,10 @@ function formatUpdatedAt(value) {
   return `Cập nhật ${date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
 }
 
-const DEFAULT_BOT_BANNER = 'https://cdn.discordapp.com/banners/1162333756137406514/758a7c684e98154b613ebba1b9993202.png?size=1024';
-
 function applyBotHeroBanner(bannerUrl) {
   if (!botPage.hero) return;
-  let cached = null;
-  try {
-    cached = localStorage.getItem('cached_bot_banner');
-  } catch (e) {}
-
-  const url = bannerUrl || cached || DEFAULT_BOT_BANNER;
-  botPage.hero.style.backgroundImage = url
-    ? `linear-gradient(135deg, rgba(9,12,26,.86), rgba(16,18,35,.64) 54%, rgba(8,11,22,.88)), url('${url}')`
+  botPage.hero.style.backgroundImage = bannerUrl
+    ? `linear-gradient(135deg, rgba(9,12,26,.86), rgba(16,18,35,.64) 54%, rgba(8,11,22,.88)), url('${bannerUrl}')`
     : '';
 }
 
@@ -908,11 +900,6 @@ function renderBotStatus(data) {
     : 'Đang chạy: 0 node・Offline';
 
   if (botPage.avatar && bot.avatar) botPage.avatar.src = bot.avatar;
-  if (bot.banner) {
-    try {
-      localStorage.setItem('cached_bot_banner', bot.banner);
-    } catch (e) {}
-  }
   applyBotHeroBanner(bot.banner);
   setBotStatusDot(status);
   setText(botPage.statusText, `${status.toUpperCase()}${bot.tag ? ` • ${bot.tag}` : ''}`);
@@ -985,7 +972,6 @@ function stopBotStatusPolling() {
 }
 
 function showBotPage() {
-  applyBotHeroBanner();
   showInnerPage(botPage.page, startBotStatusPolling);
 }
 
