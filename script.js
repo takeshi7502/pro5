@@ -22,14 +22,22 @@ const cmdLog = document.getElementById('cmd-log');
 const cmdForm = document.getElementById('cmd-form');
 const cmdInput = document.getElementById('cmd-input');
 const siteLoader = document.getElementById('site-loader');
+const appRoot = document.getElementById('app-root');
 
 const musicPlayer = {
   audio: document.getElementById('audio-player'),
   play: document.getElementById('music-play'),
-  playIcon: document.getElementById('music-play-icon'),
   progress: document.getElementById('music-progress'),
   currentTime: document.getElementById('music-current-time'),
   duration: document.getElementById('music-duration'),
+  title: document.getElementById('music-title'),
+  previous: document.getElementById('music-prev'),
+  next: document.getElementById('music-next'),
+  trackIndex: 0,
+  tracks: [
+    { title: 'Weathering with You', src: './data/music/Weathering_with_you_Lofi.mp3' },
+    { title: 'Beautiful Piano Music', src: './data/music/2 Hour Beautiful Piano Music.mp3' },
+  ],
 };
 
 const presenceEls = {
@@ -108,11 +116,21 @@ const introLines = [
 function dismissSiteLoader() {
   if (!siteLoader || siteLoader.classList.contains('is-leaving')) return;
   siteLoader.classList.add('is-leaving');
-  window.setTimeout(() => { siteLoader.hidden = true; }, 460);
+  window.setTimeout(() => {
+    siteLoader.hidden = true;
+    startTerminalIntro();
+  }, 460);
 }
 
-window.addEventListener('load', () => window.setTimeout(dismissSiteLoader, 720), { once: true });
-window.setTimeout(dismissSiteLoader, 2200);
+const SITE_LOADER_DURATION_MS = 3000;
+if (siteLoader) {
+  siteLoader.style.setProperty('--loader-duration', `${SITE_LOADER_DURATION_MS}ms`);
+  window.setTimeout(() => {
+    const status = document.getElementById('loader-status');
+    if (status) status.textContent = 'ready — welcome to my world';
+  }, SITE_LOADER_DURATION_MS * 0.85);
+  window.setTimeout(dismissSiteLoader, SITE_LOADER_DURATION_MS);
+}
 
 function formatMediaTime(value) {
   if (!Number.isFinite(value) || value < 0) return '--:--';
@@ -122,21 +140,38 @@ function formatMediaTime(value) {
 }
 
 function syncMusicState() {
-  const { audio, play, playIcon, progress, currentTime, duration } = musicPlayer;
+  const { audio, play, progress, currentTime, duration } = musicPlayer;
   if (!audio || !progress) return;
   const total = Number.isFinite(audio.duration) ? audio.duration : 0;
   const percent = total ? (audio.currentTime / total) * 100 : 0;
   progress.value = String(percent);
   progress.style.setProperty('--progress', `${percent}%`);
   if (currentTime) currentTime.textContent = formatMediaTime(audio.currentTime) === '--:--' ? '0:00' : formatMediaTime(audio.currentTime);
-  if (duration) duration.textContent = formatMediaTime(total);
+  if (duration) duration.textContent = total ? formatMediaTime(total) : '--:--';
   if (play) {
     const isPlaying = !audio.paused;
     play.classList.toggle('is-playing', isPlaying);
     play.setAttribute('aria-pressed', String(isPlaying));
     play.setAttribute('aria-label', isPlaying ? 'Tạm dừng nhạc' : 'Phát nhạc');
-    if (playIcon) playIcon.textContent = isPlaying ? '❚❚' : '▶';
+    play.setAttribute('title', isPlaying ? 'Tạm dừng nhạc' : 'Phát nhạc');
   }
+}
+
+async function changeMusicTrack(direction) {
+  const { audio, tracks, title } = musicPlayer;
+  if (!audio) return;
+  musicPlayer.trackIndex = (musicPlayer.trackIndex + direction + tracks.length) % tracks.length;
+  const track = tracks[musicPlayer.trackIndex];
+  if (title) title.textContent = track.title;
+  audio.src = track.src;
+  audio.load();
+  syncMusicState();
+  try {
+    await audio.play();
+  } catch (error) {
+    console.warn('Music playback could not start:', error);
+  }
+  syncMusicState();
 }
 
 function initMusicPlayer() {
@@ -158,7 +193,10 @@ function initMusicPlayer() {
     audio.currentTime = (Number(progress.value) / 100) * audio.duration;
     syncMusicState();
   });
-  ['loadedmetadata', 'timeupdate', 'play', 'pause', 'ended'].forEach((eventName) => {
+  musicPlayer.previous?.addEventListener('click', () => changeMusicTrack(-1));
+  musicPlayer.next?.addEventListener('click', () => changeMusicTrack(1));
+  audio.addEventListener('ended', () => changeMusicTrack(1));
+  ['loadedmetadata', 'durationchange', 'emptied', 'timeupdate', 'play', 'pause'].forEach((eventName) => {
     audio.addEventListener(eventName, syncMusicState);
   });
   syncMusicState();
@@ -229,8 +267,16 @@ function typeIntro() {
     }
   }, 18);
 }
-renderCmd();
-typeIntro();
+function startTerminalIntro() {
+  if (terminalScreen.classList.contains('active') || profileScreen.classList.contains('active')) return;
+  document.body.classList.remove('site-loading');
+  if (appRoot) appRoot.inert = false;
+  showScreen(terminalScreen);
+  renderCmd();
+  typeIntro();
+}
+
+if (!siteLoader) startTerminalIntro();
 
 function showScreen(screen) {
   [terminalScreen, profileScreen].forEach((item) => item.classList.remove('active'));
@@ -724,6 +770,7 @@ function rotateDecoration() {
 setInterval(rotateDecoration, 5000);
 
 function enterConsole() {
+  if (document.body.classList.contains('site-loading') || !terminalScreen.classList.contains('active')) return;
   if (introTimer) clearInterval(introTimer);
   showScreen(profileScreen);
 }
@@ -1192,11 +1239,11 @@ function setPanelState(collapsed) {
   mobilePanelBackdrop?.classList.toggle('active', !collapsed);
 
   if (collapsed) {
-    panelToggleBtn?.setAttribute('title', 'Mở rộng bảng');
+    panelToggleBtn?.setAttribute('title', 'Mở rộng bảng (F)');
     panelToggleBtn?.setAttribute('aria-label', 'Mở rộng bảng');
     document.body.classList.remove('mobile-panel-open');
   } else {
-    panelToggleBtn?.setAttribute('title', 'Thu gọn bảng');
+    panelToggleBtn?.setAttribute('title', 'Thu gọn bảng (F)');
     panelToggleBtn?.setAttribute('aria-label', 'Thu gọn bảng');
     if (window.innerWidth <= 880) {
       document.body.classList.add('mobile-panel-open');
@@ -1204,11 +1251,13 @@ function setPanelState(collapsed) {
   }
 }
 
+function togglePanel() {
+  if (!rightPanelContainer) return;
+  setPanelState(!rightPanelContainer.classList.contains('collapsed'));
+}
+
 if (panelToggleBtn && rightPanelContainer) {
-  panelToggleBtn.addEventListener('click', () => {
-    const isCurrentlyCollapsed = rightPanelContainer.classList.contains('collapsed');
-    setPanelState(!isCurrentlyCollapsed);
-  });
+  panelToggleBtn.addEventListener('click', togglePanel);
 }
 
 if (closeMobilePanelBtn) {
@@ -1223,11 +1272,17 @@ if (mobilePanelBackdrop) {
   });
 }
 
-// ESC key closes panel if open
+// Panel shortcuts: Escape closes; F toggles outside editable fields.
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && rightPanelContainer && !rightPanelContainer.classList.contains('collapsed')) {
     setPanelState(true);
   }
+  if (e.key.toLowerCase() !== 'f' || e.defaultPrevented || e.repeat || e.isComposing || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (!profileScreen.classList.contains('active')) return;
+  const target = e.target;
+  if (target instanceof Element && (target.closest('input, textarea, select') || target.isContentEditable)) return;
+  e.preventDefault();
+  togglePanel();
 });
 
 // Mobile drag handle swipe down to close

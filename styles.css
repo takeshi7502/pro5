@@ -92,21 +92,24 @@ button, a { font: inherit; cursor: pointer; }
 .ambient { display: none; }
 .scanlines { position: fixed; inset: 0; pointer-events: none; z-index: 20; opacity: 0.06; background: repeating-linear-gradient(0deg, rgba(255,255,255,.13) 0 1px, transparent 1px 4px); mix-blend-mode: overlay; }
 
-/* Startup overlay — intentionally brief so the terminal remains the main intro. */
-.site-loader { position: fixed; inset: 0; z-index: 200; display: grid; place-content: center; justify-items: center; gap: 13px; padding: 24px; color: #eef4ff; background: radial-gradient(circle at 50% 44%, rgba(88,101,242,.22), transparent 26%), linear-gradient(145deg, rgba(4,7,16,.96), rgba(9,13,30,.94)); opacity: 1; visibility: visible; transition: opacity .42s ease, visibility 0s linear .42s; }
+/* Startup overlay with an animated image and a short, configurable intro. */
+.site-loader { position: fixed; inset: 0; z-index: 200; display: grid; place-content: center; justify-items: center; gap: 13px; padding: 24px; color: #eef4ff; background: radial-gradient(circle at 50% 44%, rgba(88,101,242,.22), transparent 26%), linear-gradient(145deg, #040710, #090d1e); opacity: 1; visibility: visible; transition: opacity .42s ease, visibility 0s linear .42s; }
 .site-loader.is-leaving { opacity: 0; visibility: hidden; pointer-events: none; }
-.loader-orbit { position: relative; width: 54px; height: 54px; border: 1px solid rgba(174,192,255,.25); border-radius: 50%; box-shadow: 0 0 36px rgba(88,101,242,.32), inset 0 0 22px rgba(53,232,255,.1); animation: loaderSpin 1.35s linear infinite; }
-.loader-orbit::before, .loader-orbit::after { content: ""; position: absolute; border-radius: 50%; background: #d7ddff; box-shadow: 0 0 12px #8b98ff; }
-.loader-orbit::before { width: 7px; height: 7px; top: -4px; left: 50%; transform: translateX(-50%); }
-.loader-orbit::after { width: 5px; height: 5px; bottom: 5px; right: 7px; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
-.loader-orbit span { position: absolute; inset: 11px; border-radius: 50%; border: 1px solid rgba(255,79,216,.48); }
-.loader-orbit i { position: absolute; inset: 19px; border-radius: 50%; background: linear-gradient(135deg, #ff7adf, #6b7dff 55%, #4cecff); box-shadow: 0 0 18px rgba(255,79,216,.52); }
+.site-loader[hidden] { display: none; }
+body.site-loading #app-root { visibility: hidden; pointer-events: none; }
+.loader-art { position: relative; display: grid; place-items: center; width: 176px; height: 176px; margin-bottom: 6px; animation: loaderFloat 2.4s ease-in-out infinite; }
+.loader-image { display: block; width: 124px; height: 124px; object-fit: cover; border: 3px solid rgba(199,207,255,.3); border-radius: 50%; box-shadow: 0 0 48px rgba(88,101,242,.3), 0 12px 32px rgba(0,0,0,.35); }
+.loader-decoration { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 0 8px rgba(255,79,216,.2)); }
 .loader-copy { display: grid; gap: 4px; text-align: center; }
 .loader-kicker { color: #aebbe1; font: 800 10px/1 "JetBrains Mono", monospace; letter-spacing: .2em; }
 .loader-copy strong { font-size: 17px; letter-spacing: -.02em; }
 .loader-copy small { color: #95a5cb; font: 600 11px/1.4 "JetBrains Mono", monospace; }
 .loader-progress { width: min(220px, 62vw); height: 3px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.09); }
-.loader-progress span { display: block; width: 42%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #ff73d9, #6979ff, #45e7ff); box-shadow: 0 0 14px rgba(83,220,255,.7); animation: loaderSweep 1.05s ease-in-out infinite; }
+.loader-progress span { display: block; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #ff73d9, #6979ff, #45e7ff); box-shadow: 0 0 14px rgba(83,220,255,.7); transform: scaleX(0); transform-origin: left; animation: loaderFill var(--loader-duration, 3s) linear forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-art { animation: none; }
+}
 
 body.color-page-active .screen { padding-bottom:30px; align-items:start; }
 body.color-page-active .profile-screen { padding-top:34px; }
@@ -150,6 +153,9 @@ body.color-page-active .profile-console { margin-top:0; }
 .profile-console::before { content: ""; position: absolute; inset: 0; z-index: 10; pointer-events: none; border-radius: inherit; padding: 2px; background: linear-gradient(180deg, #ff7adf 0%, #c56cff 34%, rgba(255,255,255,.22) 50%, #5865f2 68%, #35e8ff 100%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: .95; }
 .profile-console::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit; background: radial-gradient(360px circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(255,255,255,.18), rgba(53,232,255,.08) 28%, transparent 58%); opacity: 0; mix-blend-mode: screen; transition: opacity .22s ease; }
 .profile-console.interactive-hover::after { opacity: 1; }
+.profile-stack { --music-height: 60px; --music-gap: 16px; width: 1010px; max-width: min(1010px, 96vw); height: min(720px, 94vh); margin: auto; display: flex; flex-direction: column; gap: var(--music-gap); min-height: 0; transition: width .35s cubic-bezier(0.4, 0, 0.2, 1); }
+.profile-stack:has(.profile-console.collapsed) { width: 410px; }
+.profile-stack > .profile-console { flex: 1 1 0; min-height: 0; height: auto; max-height: none; width: 100%; max-width: 100%; margin: 0; }
 .hover-ripple { display: none !important; }
 
 /* Custom scrollbars */
@@ -164,23 +170,19 @@ body.color-page-active .profile-console { margin-top:0; }
 .profile-console.collapsed .profile-left-col { border-right: none; }
 .profile-fixed-top { flex-shrink: 0; display: flex; flex-direction: column; }
 .profile-scroll-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding-bottom: 12px; }
-.music-dock { position: relative; z-index: 6; flex: 0 0 108px; margin: 0 12px 12px; padding: 10px 11px 9px; overflow: hidden; border: 1px solid rgba(187,202,255,.16); border-radius: 12px; background: linear-gradient(125deg, rgba(24,29,51,.94), rgba(13,17,33,.95)); box-shadow: 0 12px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.07); }
-.music-dock::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(180px 72px at 92% 0%, rgba(88,101,242,.2), transparent 74%), linear-gradient(90deg, transparent, rgba(53,232,255,.04)); }
-.music-dock-main, .music-dock-progress { position: relative; z-index: 1; }
-.music-dock-main { display: flex; align-items: center; min-width: 0; gap: 10px; }
-.music-cover { width: 43px; height: 43px; flex: 0 0 43px; border-radius: 9px; object-fit: cover; border: 1px solid rgba(255,255,255,.14); box-shadow: 0 6px 16px rgba(0,0,0,.28); }
-.music-meta { display: grid; min-width: 0; gap: 2px; }
-.music-meta span { color: #a8b7df; font: 800 9px/1 "JetBrains Mono", monospace; letter-spacing: .12em; }
-.music-meta strong, .music-meta small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.music-meta strong { color: #f5f7ff; font-size: 12px; line-height: 1.25; }
-.music-meta small { color: #9caad0; font-size: 10.5px; }
-.music-play { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; margin-left: auto; padding: 0; border: 1px solid rgba(210,221,255,.2); border-radius: 50%; color: #fff; background: linear-gradient(135deg, #6979ff, #5865f2); box-shadow: 0 6px 16px rgba(88,101,242,.36); transition: transform .18s ease, filter .18s ease; }
-.music-play:hover { filter: brightness(1.12); transform: translateY(-1px) scale(1.04); }
-.music-play:active { transform: scale(.96); }
-.music-play span { margin-left: 2px; font-size: 12px; line-height: 1; }
-.music-play.is-playing { background: linear-gradient(135deg, #ec70c9, #7b71ff); }
-.music-play.is-playing span { margin-left: 0; font-size: 11px; }
-.music-dock-progress { display: grid; grid-template-columns: 29px minmax(0, 1fr) 31px; align-items: center; gap: 7px; margin-top: 10px; color: #9eadd1; font: 700 9px/1 "JetBrains Mono", monospace; }
+.music-dock { position: relative; flex: 0 0 var(--music-height); width: 100%; min-height: 0; display: flex; align-items: center; gap: 12px; margin: 0; padding: 10px 14px; overflow: hidden; border: 1px solid rgba(187,202,255,.18); border-radius: 10px; background: rgba(13,17,30,.72); backdrop-filter: blur(24px) saturate(140%); -webkit-backdrop-filter: blur(24px) saturate(140%); box-shadow: 0 12px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08); }
+.music-cover { width: 36px; height: 36px; flex: 0 0 36px; border-radius: 6px; object-fit: cover; }
+.music-meta { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 7px; }
+.music-meta strong { color: #f5f7ff; font-size: 12px; font-weight: 600; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.music-controls { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+.music-controls button { width: 24px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 5px; color: #a7acc1; background: transparent; cursor: pointer; transition: color .18s ease, background .18s ease; }
+.music-controls button:hover { color: #fff; background: rgba(255,255,255,.06); }
+.music-controls button:focus-visible, .music-dock-progress input:focus-visible { outline: 2px solid #a6afff; outline-offset: 4px; }
+.music-controls svg { width: 16px; height: 16px; display: block; fill: currentColor; }
+.music-play span, .music-play svg { width: 20px; height: 20px; }
+.music-icon-pause, .music-play.is-playing .music-icon-play { display: none !important; }
+.music-play.is-playing .music-icon-pause { display: block !important; }
+.music-dock-progress { display: grid; grid-template-columns: 29px minmax(0, 1fr) 31px; align-items: center; gap: 7px; color: #9eadd1; font: 500 9px/1 "Inter", sans-serif; font-variant-numeric: tabular-nums; }
 .music-dock-progress > span:last-child { text-align: right; }
 .music-dock-progress input { --progress: 0%; width: 100%; height: 3px; margin: 0; appearance: none; -webkit-appearance: none; border-radius: 999px; outline: none; cursor: pointer; background: linear-gradient(90deg, #a6afff 0 var(--progress), rgba(255,255,255,.14) var(--progress) 100%); }
 .music-dock-progress input::-webkit-slider-thumb { width: 10px; height: 10px; appearance: none; -webkit-appearance: none; border: 2px solid #dfe5ff; border-radius: 50%; background: #6979ff; box-shadow: 0 0 8px rgba(105,121,255,.8); }
@@ -418,8 +420,8 @@ body.color-page-active .profile-console { margin-top:0; }
 @keyframes hoverRipple { to { opacity:0; transform:translate(-50%, -50%) scale(24); } }
 @keyframes pageRipple { to { opacity:0; transform:translate(-50%, -50%) scale(34); } }
 @keyframes blink { 50% { opacity:0; } }
-@keyframes loaderSpin { to { transform: rotate(360deg); } }
-@keyframes loaderSweep { 0% { transform: translateX(-110%); } 55%, 100% { transform: translateX(265%); } }
+@keyframes loaderFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes loaderFill { to { transform: scaleX(1); } }
 
 /* ============================================================
    RESPONSIVE DESIGN (MOBILE & TABLET)
@@ -472,6 +474,20 @@ body.mobile-panel-open {
   }
 
   /* 2. Main Profile Card: perfectly centered & sized for mobile viewport */
+  .profile-stack,
+  .profile-stack:has(.profile-console.collapsed) {
+    width: min(410px, 94vw);
+    max-width: min(410px, 94vw);
+    height: min(650px, calc(100dvh - 28px));
+    --music-gap: 12px;
+  }
+  #profile-screen .profile-stack > .profile-console {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+  }
   .profile-console {
     margin: auto !important;
     width: min(410px, 94vw) !important;
@@ -515,13 +531,6 @@ body.mobile-panel-open {
     overflow-x: hidden !important;
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
-  }
-
-  .music-dock {
-    flex-basis: 104px;
-    margin: 0 10px 10px;
-    padding: 9px 10px 8px;
-    border-radius: 11px;
   }
 
   /* Keep toggle button visible */
@@ -768,6 +777,14 @@ body.mobile-panel-open {
     height: min(630px, calc(100dvh - 20px)) !important;
     max-height: calc(100dvh - 20px) !important;
   }
+  .profile-stack,
+  .profile-stack:has(.profile-console.collapsed) {
+    width: min(400px, 95vw);
+    max-width: min(400px, 95vw);
+    height: min(630px, calc(100dvh - 20px));
+  }
+  .music-dock { gap: 9px; padding-left: 11px; padding-right: 11px; }
+  .music-cover { width: 34px; height: 34px; flex-basis: 34px; }
   .profile-left-col {
     height: 100% !important;
     max-height: 100% !important;
