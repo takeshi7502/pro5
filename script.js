@@ -35,6 +35,7 @@ const musicPlayer = {
   next: document.getElementById('music-next'),
   trackIndex: 0,
   tracks: [
+    { title: 'Waku Waku Song || Anya', src: './data/music/wakusong.mp3', loop: true },
     { title: 'Weathering with You', src: './data/music/Weathering_with_you_Lofi.mp3' },
     { title: 'Beautiful Piano Music', src: './data/music/2 Hour Beautiful Piano Music.mp3' },
   ],
@@ -157,15 +158,9 @@ function syncMusicState() {
   }
 }
 
-async function changeMusicTrack(direction) {
-  const { audio, tracks, title } = musicPlayer;
+async function playMusic() {
+  const { audio } = musicPlayer;
   if (!audio) return;
-  musicPlayer.trackIndex = (musicPlayer.trackIndex + direction + tracks.length) % tracks.length;
-  const track = tracks[musicPlayer.trackIndex];
-  if (title) title.textContent = track.title;
-  audio.src = track.src;
-  audio.load();
-  syncMusicState();
   try {
     await audio.play();
   } catch (error) {
@@ -174,19 +169,32 @@ async function changeMusicTrack(direction) {
   syncMusicState();
 }
 
+async function changeMusicTrack(direction) {
+  const { audio, tracks, title } = musicPlayer;
+  if (!audio) return;
+  musicPlayer.trackIndex = (musicPlayer.trackIndex + direction + tracks.length) % tracks.length;
+  const track = tracks[musicPlayer.trackIndex];
+  if (title) title.textContent = track.title;
+  audio.loop = Boolean(track.loop);
+  audio.src = track.src;
+  audio.load();
+  syncMusicState();
+  await playMusic();
+}
+
 function initMusicPlayer() {
   const { audio, play, progress } = musicPlayer;
   if (!audio || !play || !progress) return;
 
-  audio.volume = 0.68;
-  play.addEventListener('click', async () => {
-    try {
-      if (audio.paused) await audio.play();
-      else audio.pause();
-    } catch (error) {
-      console.warn('Music playback could not start:', error);
+  audio.volume = 0.5;
+  audio.loop = Boolean(musicPlayer.tracks[musicPlayer.trackIndex].loop);
+  play.addEventListener('click', () => {
+    if (audio.paused) {
+      void playMusic();
+    } else {
+      audio.pause();
+      syncMusicState();
     }
-    syncMusicState();
   });
   progress.addEventListener('input', () => {
     if (!Number.isFinite(audio.duration)) return;
@@ -195,7 +203,8 @@ function initMusicPlayer() {
   });
   musicPlayer.previous?.addEventListener('click', () => changeMusicTrack(-1));
   musicPlayer.next?.addEventListener('click', () => changeMusicTrack(1));
-  audio.addEventListener('ended', () => changeMusicTrack(1));
+  // Only manual track changes may select another song; Waku loops natively.
+  audio.addEventListener('ended', syncMusicState);
   ['loadedmetadata', 'durationchange', 'emptied', 'timeupdate', 'play', 'pause'].forEach((eventName) => {
     audio.addEventListener(eventName, syncMusicState);
   });
@@ -773,6 +782,8 @@ function enterConsole() {
   if (document.body.classList.contains('site-loading') || !terminalScreen.classList.contains('active')) return;
   if (introTimer) clearInterval(introTimer);
   showScreen(profileScreen);
+  // Keep play() in the Join World / Enter gesture so browsers allow audio.
+  void playMusic();
 }
 
 ['page-one-link', 'page-two-link'].forEach((id) => {
