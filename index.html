@@ -98,6 +98,15 @@
 </head>
 
 <body class="terminal-active">
+  <div id="site-loader" class="site-loader" role="status" aria-live="polite" aria-label="Đang khởi tạo trang cá nhân">
+    <div class="loader-orbit" aria-hidden="true"><span></span><i></i></div>
+    <div class="loader-copy">
+      <span class="loader-kicker">TAKESHI.DEV</span>
+      <strong>Initializing profile</strong>
+      <small id="loader-status">loading your little world...</small>
+    </div>
+    <div class="loader-progress" aria-hidden="true"><span></span></div>
+  </div>
   <div id="pointer-glow" class="pointer-glow" aria-hidden="true"></div>
   <div class="scanlines" aria-hidden="true"></div>
 
@@ -229,6 +238,28 @@
               </div>
             </div>
           </div>
+
+          <section class="music-dock" aria-label="Trình phát nhạc lofi">
+            <audio id="audio-player" preload="metadata" loop>
+              <source src="./data/music/Weathering_with_you_Lofi.mp3" type="audio/mpeg" />
+            </audio>
+            <div class="music-dock-main">
+              <img class="music-cover" src="./data/waku.jpg" alt="Bìa bài nhạc đang phát" />
+              <div class="music-meta">
+                <span>NOW PLAYING</span>
+                <strong>Weathering with You</strong>
+                <small>Lofi rain remix</small>
+              </div>
+              <button id="music-play" class="music-play" type="button" aria-label="Phát nhạc" aria-pressed="false">
+                <span id="music-play-icon" aria-hidden="true">▶</span>
+              </button>
+            </div>
+            <div class="music-dock-progress">
+              <span id="music-current-time">0:00</span>
+              <input id="music-progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="Tiến độ bài nhạc" />
+              <span id="music-duration">--:--</span>
+            </div>
+          </section>
         </aside>
         <!-- END: Left Profile Column -->
 

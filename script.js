@@ -21,6 +21,16 @@ const cmdNewTab = document.getElementById('cmd-new-tab');
 const cmdLog = document.getElementById('cmd-log');
 const cmdForm = document.getElementById('cmd-form');
 const cmdInput = document.getElementById('cmd-input');
+const siteLoader = document.getElementById('site-loader');
+
+const musicPlayer = {
+  audio: document.getElementById('audio-player'),
+  play: document.getElementById('music-play'),
+  playIcon: document.getElementById('music-play-icon'),
+  progress: document.getElementById('music-progress'),
+  currentTime: document.getElementById('music-current-time'),
+  duration: document.getElementById('music-duration'),
+};
 
 const presenceEls = {
   avatar: document.getElementById('avatar-image'),
@@ -94,6 +104,67 @@ const introLines = [
   '',
   'Press Enter to continue.',
 ];
+
+function dismissSiteLoader() {
+  if (!siteLoader || siteLoader.classList.contains('is-leaving')) return;
+  siteLoader.classList.add('is-leaving');
+  window.setTimeout(() => { siteLoader.hidden = true; }, 460);
+}
+
+window.addEventListener('load', () => window.setTimeout(dismissSiteLoader, 720), { once: true });
+window.setTimeout(dismissSiteLoader, 2200);
+
+function formatMediaTime(value) {
+  if (!Number.isFinite(value) || value < 0) return '--:--';
+  const minutes = Math.floor(value / 60);
+  const seconds = Math.floor(value % 60).toString().padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+function syncMusicState() {
+  const { audio, play, playIcon, progress, currentTime, duration } = musicPlayer;
+  if (!audio || !progress) return;
+  const total = Number.isFinite(audio.duration) ? audio.duration : 0;
+  const percent = total ? (audio.currentTime / total) * 100 : 0;
+  progress.value = String(percent);
+  progress.style.setProperty('--progress', `${percent}%`);
+  if (currentTime) currentTime.textContent = formatMediaTime(audio.currentTime) === '--:--' ? '0:00' : formatMediaTime(audio.currentTime);
+  if (duration) duration.textContent = formatMediaTime(total);
+  if (play) {
+    const isPlaying = !audio.paused;
+    play.classList.toggle('is-playing', isPlaying);
+    play.setAttribute('aria-pressed', String(isPlaying));
+    play.setAttribute('aria-label', isPlaying ? 'Tạm dừng nhạc' : 'Phát nhạc');
+    if (playIcon) playIcon.textContent = isPlaying ? '❚❚' : '▶';
+  }
+}
+
+function initMusicPlayer() {
+  const { audio, play, progress } = musicPlayer;
+  if (!audio || !play || !progress) return;
+
+  audio.volume = 0.68;
+  play.addEventListener('click', async () => {
+    try {
+      if (audio.paused) await audio.play();
+      else audio.pause();
+    } catch (error) {
+      console.warn('Music playback could not start:', error);
+    }
+    syncMusicState();
+  });
+  progress.addEventListener('input', () => {
+    if (!Number.isFinite(audio.duration)) return;
+    audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+    syncMusicState();
+  });
+  ['loadedmetadata', 'timeupdate', 'play', 'pause', 'ended'].forEach((eventName) => {
+    audio.addEventListener(eventName, syncMusicState);
+  });
+  syncMusicState();
+}
+
+initMusicPlayer();
 
 let activeTabId = 'boot';
 let tabCount = 1;
