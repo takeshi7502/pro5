@@ -478,7 +478,8 @@ body.mobile-panel-open {
   .profile-stack:has(.profile-console.collapsed) {
     width: min(410px, 94vw);
     max-width: min(410px, 94vw);
-    height: min(650px, calc(100dvh - 28px));
+    /* Profile: 578px -> ~636px (+10%); keep music height and gap unchanged. */
+    height: min(calc(636px + var(--music-height) + var(--music-gap)), calc(100dvh - 28px));
     --music-gap: 12px;
   }
   #profile-screen .profile-stack > .profile-console {
@@ -492,7 +493,7 @@ body.mobile-panel-open {
     margin: auto !important;
     width: min(410px, 94vw) !important;
     max-width: min(410px, 94vw) !important;
-    height: min(650px, calc(100dvh - 28px)) !important;
+    height: min(636px, calc(100dvh - 28px)) !important;
     max-height: calc(100dvh - 28px) !important;
     display: flex !important;
     flex-direction: column !important;
@@ -774,14 +775,15 @@ body.mobile-panel-open {
   .profile-console {
     width: min(400px, 95vw) !important;
     max-width: min(400px, 95vw) !important;
-    height: min(630px, calc(100dvh - 20px)) !important;
+    height: min(614px, calc(100dvh - 20px)) !important;
     max-height: calc(100dvh - 20px) !important;
   }
   .profile-stack,
   .profile-stack:has(.profile-console.collapsed) {
     width: min(400px, 95vw);
     max-width: min(400px, 95vw);
-    height: min(630px, calc(100dvh - 20px));
+    /* Profile: 558px -> ~614px (+10%); music is excluded from the increase. */
+    height: min(calc(614px + var(--music-height) + var(--music-gap)), calc(100dvh - 20px));
   }
   .music-dock { gap: 9px; padding-left: 11px; padding-right: 11px; }
   .music-cover { width: 34px; height: 34px; flex-basis: 34px; }
