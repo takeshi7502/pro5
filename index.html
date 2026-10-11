@@ -82,7 +82,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20261007-mobile-profile-10pct" />
+  <link rel="stylesheet" href="styles.css?v=20261012-my-bot-compact" />
 
   <!-- Vercel Web Analytics -->
   <script>
@@ -276,12 +276,12 @@
                 Trang web
                 <span class="tab-indicator"></span>
               </button>
-              <button class="nav-tab-btn" data-tab="colorizer" type="button" role="tab" aria-selected="false">
-                Unity Text
+              <button class="nav-tab-btn" data-tab="bot" type="button" role="tab" aria-selected="false">
+                My Bot
                 <span class="tab-indicator"></span>
               </button>
-              <button class="nav-tab-btn" data-tab="bot" type="button" role="tab" aria-selected="false">
-                Discord Bot
+              <button class="nav-tab-btn" data-tab="colorizer" type="button" role="tab" aria-selected="false">
+                Unity Text
                 <span class="tab-indicator"></span>
               </button>
             </nav>
@@ -465,49 +465,99 @@
               <button id="tc-copy" class="copy-btn" type="button">Copy Unity Rich Text</button>
             </div>
 
-            <!-- TAB 4: Discord Music Bot -->
+            <!-- TAB 4: My bot -->
             <div id="tab-bot" class="tab-content" role="tabpanel">
-              <div class="embedded-tool-header">
-                <h3 id="bot-page-title">Music Bot Status</h3>
-              </div>
-
-              <div class="bot-hero">
-                <div class="bot-avatar-wrap">
-                  <img id="bot-avatar" class="bot-avatar" src="" alt="Bot avatar">
-                  <span id="bot-status-dot" class="bot-status-dot offline"></span>
-                </div>
-                <div>
-                  <span id="bot-status-text" class="bot-kicker">Đang kết nối API...</span>
-                  <h3 id="bot-display-name">Music Bot</h3>
-                  <p id="bot-custom-status">Đang lấy thông tin bot...</p>
-                </div>
-              </div>
-
-              <div class="bot-actions">
-                <a id="bot-invite-link" class="invite-btn disabled" href="#" target="_blank" rel="noopener noreferrer">Thêm bot vào server</a>
-                <span id="bot-updated-at" class="bot-note">Chưa cập nhật</span>
-              </div>
-
-              <div class="bot-live-grid" aria-label="Music bot live stats">
-                <article><span>Ping</span><strong id="bot-ping">--ms</strong></article>
-                <article><span>Servers</span><strong id="bot-servers">--</strong></article>
-                <article><span>Đang phát</span><strong id="bot-playing">-- phòng</strong></article>
-                <article><span>Kết nối</span><strong id="bot-connected">-- phòng</strong></article>
-                <article class="wide"><span>Runtime</span><strong id="bot-runtime">--</strong></article>
-                <article class="wide"><span>Lavalink</span><strong id="bot-lavalink">--</strong></article>
-              </div>
-
-              <div class="bot-feature-grid">
-                <article><span>01</span><strong>Music-first</strong><p>Tập trung phát nhạc, queue và trải nghiệm nghe gọn nhẹ.</p></article>
-                <article><span>02</span><strong>Realtime status</strong><p>Dữ liệu lấy trực tiếp từ API của source bot đang chạy.</p></article>
-                <article><span>03</span><strong>Server friendly</strong><p>Landing page nhẹ để review và mời bot vào server.</p></article>
-              </div>
+              <div id="bot-catalog" class="bot-catalog"></div>
+              <template id="discord-bot-template">
+                <details class="bot-entry">
+                  <summary class="website-card bot-card">
+                    <span class="website-icon-wrap bot-icon-wrap">
+                      <img class="bot-avatar" data-bot-field="avatar" src="./data/waku.jpg" alt="" />
+                      <span class="bot-status-dot offline" data-bot-field="statusDot" role="img" aria-label="Bot đang offline"></span>
+                    </span>
+                    <span class="website-info">
+                      <strong class="website-name" data-bot-field="name"></strong>
+                      <span class="website-desc" data-bot-field="customStatus"></span>
+                    </span>
+                    <svg class="website-arrow bot-toggle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                  </summary>
+                  <div class="bot-details">
+                    <div class="bot-intro" data-bot-field="intro">
+                      <p data-bot-field="introduction"></p>
+                      <div class="bot-tags" data-bot-field="tags"></div>
+                    </div>
+                    <div class="bot-actions">
+                      <a class="invite-btn disabled" data-bot-field="invite" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1">Thêm bot vào server</a>
+                      <a class="bot-source-link" data-bot-field="sourceRepo" href="#" target="_blank" rel="noopener noreferrer" hidden>Source repo ↗</a>
+                      <span class="bot-note" data-bot-field="updatedAt">Chưa cập nhật</span>
+                    </div>
+                    <div class="bot-live-grid" data-bot-field="stats" aria-label="Thông số bot">
+                      <article><span>Ping</span><strong data-bot-field="ping">--ms</strong></article>
+                      <article><span>Servers</span><strong data-bot-field="servers">--</strong></article>
+                      <article><span>Đang phát</span><strong data-bot-field="playing">-- phòng</strong></article>
+                      <article><span>Kết nối</span><strong data-bot-field="connected">-- phòng</strong></article>
+                      <article class="wide"><span>Runtime</span><strong data-bot-field="runtime">--</strong></article>
+                      <article class="wide"><span>Lavalink</span><strong data-bot-field="lavalink">--</strong></article>
+                    </div>
+                    <div class="bot-feature-grid" data-bot-field="features"></div>
+                  </div>
+                </details>
+              </template>
+              <template id="bot-pair-template">
+                <details class="bot-entry bot-entry-pair">
+                  <summary class="website-card bot-card bot-pair-card">
+                    <span class="bot-platforms">
+                      <span class="bot-platform">
+                        <span class="website-icon-wrap bot-icon-wrap">
+                          <img class="bot-avatar" data-bot-field="leftAvatar" src="./data/waku.jpg" alt="" />
+                          <span class="bot-platform-badge discord" aria-hidden="true">DC</span>
+                        </span>
+                        <span class="website-info">
+                          <strong class="website-name" data-bot-field="leftName">Waku</strong>
+                          <span class="website-desc" data-bot-field="leftDescription">Discord</span>
+                        </span>
+                      </span>
+                      <span class="bot-platform">
+                        <span class="website-icon-wrap bot-icon-wrap">
+                          <img class="bot-avatar" data-bot-field="rightAvatar" src="./data/waku.jpg" alt="" />
+                          <span class="bot-platform-badge telegram" aria-hidden="true">TG</span>
+                        </span>
+                        <span class="website-info">
+                          <strong class="website-name" data-bot-field="rightName">Waku</strong>
+                          <span class="website-desc" data-bot-field="rightDescription">Telegram</span>
+                        </span>
+                      </span>
+                    </span>
+                    <svg class="website-arrow bot-toggle" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                  </summary>
+                  <div class="bot-details">
+                    <div class="bot-intro" data-bot-field="intro">
+                      <p data-bot-field="introduction"></p>
+                      <div class="bot-tags" data-bot-field="tags"></div>
+                    </div>
+                    <div class="bot-platform-actions">
+                      <div class="bot-platform-action">
+                        <span class="bot-platform-label discord">Discord</span>
+                        <a class="invite-btn" data-bot-field="leftInvite" href="#" target="_blank" rel="noopener noreferrer">Thêm vào server ↗</a>
+                      </div>
+                      <div class="bot-platform-action">
+                        <span class="bot-platform-label telegram">Telegram</span>
+                        <a class="invite-btn" data-bot-field="rightInvite" href="#" target="_blank" rel="noopener noreferrer">Chat với Waku ↗</a>
+                      </div>
+                    </div>
+                    <div class="bot-actions bot-shared-actions">
+                      <a class="bot-source-link" data-bot-field="sourceRepo" href="#" target="_blank" rel="noopener noreferrer">Source repo ↗</a>
+                    </div>
+                  </div>
+                </details>
+              </template>
             </div>
           </main>
         </div>
         <!-- END: Right Widgets Column -->
       </article>
-      <section class="music-dock" aria-label="Trình phát nhạc lofi">
+      <section class="music-dock" aria-label="Trình phát nhạc lofi" title="Space: phát/dừng · ↑/↓: âm lượng ±10% · ←/→: chuyển bài">
+        <output id="music-volume-notice" class="music-volume-notice" aria-live="polite" aria-atomic="true"></output>
         <audio id="audio-player" preload="metadata" loop>
           <source src="./data/music/wakusong.mp3" type="audio/mpeg" />
         </audio>
@@ -521,16 +571,16 @@
           </div>
         </div>
         <div class="music-controls">
-          <button id="music-prev" class="music-skip" type="button" aria-label="Bài trước" title="Bài trước">
+          <button id="music-prev" class="music-skip" type="button" aria-label="Bài trước" aria-keyshortcuts="ArrowLeft" title="Bài trước (←)">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h3v14H6zm13 0v14L9 12z" /></svg>
           </button>
-          <button id="music-play" class="music-play" type="button" aria-label="Phát nhạc" aria-pressed="false" title="Phát nhạc">
+          <button id="music-play" class="music-play" type="button" aria-label="Phát nhạc" aria-pressed="false" aria-keyshortcuts="Space" title="Phát nhạc (Space)">
             <span id="music-play-icon" aria-hidden="true">
               <svg class="music-icon-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z" /></svg>
               <svg class="music-icon-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z" /></svg>
             </span>
           </button>
-          <button id="music-next" class="music-skip" type="button" aria-label="Bài tiếp theo" title="Bài tiếp theo">
+          <button id="music-next" class="music-skip" type="button" aria-label="Bài tiếp theo" aria-keyshortcuts="ArrowRight" title="Bài tiếp theo (→)">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5h3v14h-3zM5 5v14l10-7z" /></svg>
           </button>
         </div>
@@ -541,7 +591,7 @@
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=20261012-my-bot-catalog"></script>
 </body>
 
 </html>

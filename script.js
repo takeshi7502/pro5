@@ -33,6 +33,8 @@ const musicPlayer = {
   title: document.getElementById('music-title'),
   previous: document.getElementById('music-prev'),
   next: document.getElementById('music-next'),
+  volumeNotice: document.getElementById('music-volume-notice'),
+  volumeNoticeTimer: null,
   trackIndex: 0,
   tracks: [
     { title: 'Waku Waku Song || Anya', src: './data/music/wakusong.mp3', loop: true },
@@ -154,7 +156,7 @@ function syncMusicState() {
     play.classList.toggle('is-playing', isPlaying);
     play.setAttribute('aria-pressed', String(isPlaying));
     play.setAttribute('aria-label', isPlaying ? 'Tạm dừng nhạc' : 'Phát nhạc');
-    play.setAttribute('title', isPlaying ? 'Tạm dừng nhạc' : 'Phát nhạc');
+    play.setAttribute('title', isPlaying ? 'Tạm dừng nhạc (Space)' : 'Phát nhạc (Space)');
   }
 }
 
@@ -167,6 +169,29 @@ async function playMusic() {
     console.warn('Music playback could not start:', error);
   }
   syncMusicState();
+}
+
+function toggleMusicPlayback() {
+  const { audio } = musicPlayer;
+  if (!audio) return;
+  if (audio.paused) void playMusic();
+  else {
+    audio.pause();
+    syncMusicState();
+  }
+}
+
+function changeMusicVolume(direction) {
+  const { audio, volumeNotice } = musicPlayer;
+  if (!audio) return;
+  const percent = Math.min(100, Math.max(0, Math.round(audio.volume * 100) + direction * 10));
+  audio.volume = percent / 100;
+  audio.muted = false;
+  if (!volumeNotice) return;
+  volumeNotice.textContent = `Âm lượng ${percent}%`;
+  volumeNotice.classList.add('is-visible');
+  window.clearTimeout(musicPlayer.volumeNoticeTimer);
+  musicPlayer.volumeNoticeTimer = window.setTimeout(() => volumeNotice.classList.remove('is-visible'), 1400);
 }
 
 async function changeMusicTrack(direction) {
@@ -188,14 +213,7 @@ function initMusicPlayer() {
 
   audio.volume = 0.5;
   audio.loop = Boolean(musicPlayer.tracks[musicPlayer.trackIndex].loop);
-  play.addEventListener('click', () => {
-    if (audio.paused) {
-      void playMusic();
-    } else {
-      audio.pause();
-      syncMusicState();
-    }
-  });
+  play.addEventListener('click', toggleMusicPlayback);
   progress.addEventListener('input', () => {
     if (!Number.isFinite(audio.duration)) return;
     audio.currentTime = (Number(progress.value) / 100) * audio.duration;
@@ -212,6 +230,22 @@ function initMusicPlayer() {
 }
 
 initMusicPlayer();
+
+document.addEventListener('keydown', (event) => {
+  if (!profileScreen.classList.contains('active') || event.defaultPrevented || event.repeat || event.isComposing || event.ctrlKey || event.altKey || event.metaKey) return;
+  const key = event.code === 'Space' ? ' ' : event.key;
+  if (![' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) return;
+  const target = event.target;
+  if (target instanceof Element) {
+    if (target.isContentEditable || target.closest('input, textarea, select, [role="slider"], [role="textbox"]')) return;
+  }
+  // Space belongs to music here; prevent native button/summary activation as well.
+  event.preventDefault();
+  if (key === ' ') toggleMusicPlayback();
+  else if (key === 'ArrowUp') changeMusicVolume(1);
+  else if (key === 'ArrowDown') changeMusicVolume(-1);
+  else void changeMusicTrack(key === 'ArrowLeft' ? -1 : 1);
+});
 
 let activeTabId = 'boot';
 let tabCount = 1;
@@ -822,29 +856,69 @@ const BOT_STATUS_ENDPOINTS = [
   'http://127.0.0.1:20128/api/public-status',
 ];
 const BOT_STATUS_REFRESH_MS = 15000;
+// Thêm bot vào danh sách này; topic tạo nhóm, platforms dùng cho bot đa nền tảng.
+const BOT_CATALOG = [
+  {
+    id: 'tekisha-music',
+    topic: 'Music Discord bot',
+    name: 'Tekisha Music',
+    description: 'Playing Music',
+    avatar: './data/waku.jpg',
+    endpoints: BOT_STATUS_ENDPOINTS,
+    features: [
+      { title: 'Music-first', description: 'Tập trung phát nhạc, queue và trải nghiệm nghe gọn nhẹ.' },
+      { title: 'Realtime status', description: 'Dữ liệu lấy trực tiếp từ API của source bot đang chạy.' },
+      { title: 'Server friendly', description: 'Landing page nhẹ để review và mời bot vào server.' },
+    ],
+  },
+  {
+    id: 'mirror-telegram',
+    topic: 'Mirror Telegram bot',
+    name: 'Jinmups Mirror',
+    description: 'Mirror / Leech · @jinmups_bot',
+    avatar: './data/bots/mirror.svg',
+    introduction: 'Bot mirror/leech trên Telegram, hỗ trợ tải tệp từ nhiều nguồn, quản lý hàng đợi và gửi tệp về Telegram hoặc đưa lên Google Drive, Rclone. Mã nguồn WZML giúp bạn tuỳ chỉnh và triển khai bot riêng.',
+    tags: ['Mirror & Leech', 'Tải đa nguồn', 'Drive / Rclone'],
+    inviteLabel: 'Thêm bot vào nhóm ↗',
+    inviteUrl: 'https://t.me/jinmups_bot?startgroup',
+    sourceRepo: 'https://github.com/takeshi7502/wzml',
+  },
+  {
+    id: 'waku-ai',
+    topic: 'Waku AI chat bot',
+    introduction: 'Waku là bot chat AI trên Discord và Telegram, dùng chung cấu hình AI giữa hai nền tảng. Trò chuyện bằng tiếng Việt, hỗ trợ AI agent và các tiện ích quản lý nhóm trên Telegram — chọn nền tảng bạn muốn dùng ở bên dưới.',
+    tags: ['Chat AI', 'Tiếng Việt', 'Hai nền tảng'],
+    sourceRepo: 'https://github.com/TakeshiBot/waku-bot/',
+    platforms: [
+      {
+        name: 'Waku',
+        description: 'Discord · AI chat',
+        avatar: './data/waku.jpg',
+        inviteLabel: 'Thêm vào server ↗',
+        inviteUrl: 'https://discord.com/oauth2/authorize?client_id=1509553346468511744&permissions=274878032960&integration_type=0&scope=bot+applications.commands',
+      },
+      {
+        name: 'Waku',
+        description: 'Telegram · @jinwakubot',
+        avatar: './data/waku.jpg',
+        inviteLabel: 'Chat với Waku ↗',
+        inviteUrl: 'https://t.me/jinwakubot',
+      },
+    ],
+  },
+];
 let botStatusTimer = null;
-let activeBotStatusApi = null;
 
 const botPage = {
   page: document.getElementById('tab-bot'),
   open: document.getElementById('page-two-link'),
   back: document.getElementById('bot-back'),
-  avatar: document.getElementById('bot-avatar'),
-  statusDot: document.getElementById('bot-status-dot'),
-  statusText: document.getElementById('bot-status-text'),
-  pageTitle: document.getElementById('bot-page-title'),
-  name: document.getElementById('bot-display-name'),
-  customStatus: document.getElementById('bot-custom-status'),
-  hero: document.querySelector('.bot-hero'),
-  invite: document.getElementById('bot-invite-link'),
-  updatedAt: document.getElementById('bot-updated-at'),
-  ping: document.getElementById('bot-ping'),
-  servers: document.getElementById('bot-servers'),
-  playing: document.getElementById('bot-playing'),
-  connected: document.getElementById('bot-connected'),
-  runtime: document.getElementById('bot-runtime'),
-  lavalink: document.getElementById('bot-lavalink'),
+  list: document.getElementById('bot-catalog'),
+  template: document.getElementById('discord-bot-template'),
+  pairTemplate: document.getElementById('bot-pair-template'),
 };
+const botGroups = new Map();
+const botEntries = botPage.list && botPage.template ? BOT_CATALOG.map(createBotEntry) : [];
 
 let activeInnerPage = null;
 
@@ -998,9 +1072,116 @@ function setText(element, value) {
   if (element) element.textContent = value;
 }
 
-function setBotStatusDot(status = 'offline') {
-  if (!botPage.statusDot) return;
-  botPage.statusDot.className = `bot-status-dot ${status}`;
+function safeBotUrl(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(value, window.location.href);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function setBotAction(link, value, label, hideWhenMissing = false) {
+  if (!link) return;
+  const url = safeBotUrl(value);
+  link.href = url || '#';
+  link.classList.toggle('disabled', !url);
+  link.setAttribute('aria-disabled', String(!url));
+  link.tabIndex = url ? 0 : -1;
+  if (label) link.textContent = label;
+  if (hideWhenMissing) link.hidden = !url;
+}
+
+function setBotInvite(entry, value) {
+  setBotAction(entry.fields.invite, value, entry.config.inviteLabel);
+}
+
+function configureBotAvatar(image, source, name) {
+  if (!image) return;
+  image.src = safeBotUrl(source) || './data/waku.jpg';
+  image.alt = name || 'Waku';
+  image.addEventListener('error', () => {
+    if (image.getAttribute('src') !== './data/waku.jpg') image.src = './data/waku.jpg';
+  });
+}
+
+function getBotGroup(topic) {
+  if (botGroups.has(topic)) return botGroups.get(topic);
+  const section = document.createElement('section');
+  section.className = 'bot-category';
+  const header = document.createElement('div');
+  header.className = 'widgets-header';
+  const heading = document.createElement('h2');
+  heading.className = 'widgets-title';
+  heading.id = `bot-category-${botGroups.size}`;
+  heading.textContent = topic;
+  section.setAttribute('aria-labelledby', heading.id);
+  const list = document.createElement('div');
+  list.className = 'websites-list bots-list';
+  header.append(heading);
+  section.append(header, list);
+  botPage.list.append(section);
+  botGroups.set(topic, list);
+  return list;
+}
+
+function createBotEntry(config) {
+  const template = config.platforms ? botPage.pairTemplate : botPage.template;
+  const root = template.content.firstElementChild.cloneNode(true);
+  root.dataset.botId = config.id;
+  const fields = Object.fromEntries([...root.querySelectorAll('[data-bot-field]')].map(element => [element.dataset.botField, element]));
+  const entry = { config, root, fields, activeEndpoint: null, pending: false };
+  setText(fields.name, config.name);
+  setText(fields.customStatus, config.description || 'Bot');
+  configureBotAvatar(fields.avatar, config.avatar, config.name);
+  setBotInvite(entry, config.inviteUrl);
+  setBotAction(fields.sourceRepo, config.sourceRepo, null, true);
+  setBotStatusDot(entry, config.status || 'offline');
+  const live = Boolean(config.endpoints?.length);
+  if (fields.statusDot) fields.statusDot.hidden = !live;
+  if (fields.stats) fields.stats.hidden = !live;
+  if (fields.updatedAt) fields.updatedAt.hidden = !live;
+  fields.intro.hidden = !config.introduction && !config.tags?.length;
+  setText(fields.introduction, config.introduction || '');
+  (config.tags || []).forEach(tag => {
+    const chip = document.createElement('span');
+    chip.textContent = tag;
+    fields.tags.append(chip);
+  });
+  (config.platforms || []).forEach((platform, index) => {
+    const prefix = index === 0 ? 'left' : 'right';
+    setText(fields[`${prefix}Name`], platform.name);
+    setText(fields[`${prefix}Description`], platform.description);
+    configureBotAvatar(fields[`${prefix}Avatar`], platform.avatar, `${platform.name} — ${platform.description}`);
+    setBotAction(fields[`${prefix}Invite`], platform.inviteUrl, platform.inviteLabel);
+  });
+  root.querySelector('.bot-details').id = `bot-details-${config.id}`;
+  root.querySelector('summary').setAttribute('aria-controls', `bot-details-${config.id}`);
+  if (fields.features) fields.features.hidden = !config.features?.length;
+  (fields.features ? config.features || [] : []).forEach((feature, index) => {
+    const article = document.createElement('article');
+    const number = document.createElement('span');
+    const title = document.createElement('strong');
+    const description = document.createElement('p');
+    number.textContent = String(index + 1).padStart(2, '0');
+    title.textContent = feature.title;
+    description.textContent = feature.description;
+    article.append(number, title, description);
+    fields.features.append(article);
+  });
+  root.addEventListener('toggle', () => {
+    if (root.open && botPage.page.classList.contains('active')) void fetchBotStatus(entry);
+  });
+  getBotGroup(config.topic || 'My Bot').append(root);
+  return entry;
+}
+
+function setBotStatusDot(entry, status = 'offline') {
+  if (!entry.fields.statusDot) return;
+  const normalized = ['online', 'idle', 'dnd', 'offline'].includes(status) ? status : 'offline';
+  entry.fields.statusDot.className = `bot-status-dot ${normalized}`;
+  entry.fields.statusDot.setAttribute('aria-label', `Bot đang ${normalized}`);
 }
 
 function formatUpdatedAt(value) {
@@ -1008,14 +1189,8 @@ function formatUpdatedAt(value) {
   return `Cập nhật ${date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
 }
 
-function applyBotHeroBanner(bannerUrl) {
-  if (!botPage.hero) return;
-  botPage.hero.style.backgroundImage = bannerUrl
-    ? `linear-gradient(135deg, rgba(9,12,26,.86), rgba(16,18,35,.64) 54%, rgba(8,11,22,.88)), url('${bannerUrl}')`
-    : '';
-}
-
-function renderBotStatus(data) {
+function renderBotStatus(entry, data) {
+  const { fields, config } = entry;
   const bot = data.bot || {};
   const music = data.music || {};
   const lavalink = data.lavalink || {};
@@ -1028,54 +1203,59 @@ function renderBotStatus(data) {
     ? `Đang chạy: ${onlineNodes} node・Online`
     : 'Đang chạy: 0 node・Offline';
 
-  if (botPage.avatar && bot.avatar) botPage.avatar.src = bot.avatar;
-  applyBotHeroBanner(bot.banner);
-  setBotStatusDot(status);
-  setText(botPage.statusText, `${status.toUpperCase()}${bot.tag ? ` • ${bot.tag}` : ''}`);
-  setText(botPage.pageTitle, bot.name || 'Music Bot');
-  setText(botPage.name, bot.name || 'Music Bot');
-  setText(botPage.customStatus, bot.customStatus || 'Không có custom status');
-  setText(botPage.ping, `${music.ping ?? '--'}ms`);
-  setText(botPage.servers, music.servers ?? '--');
-  setText(botPage.playing, `${music.playingRooms ?? '--'} phòng`);
-  setText(botPage.connected, `${music.connectedRooms ?? '--'} phòng`);
-  setText(botPage.runtime, music.runtime || '--');
-  setText(botPage.lavalink, lavalinkText);
-  setText(botPage.updatedAt, formatUpdatedAt(data.updatedAt));
-
-  if (botPage.invite && bot.inviteUrl) {
-    botPage.invite.href = bot.inviteUrl;
-    botPage.invite.classList.remove('disabled');
-  }
+  const avatar = safeBotUrl(bot.avatar);
+  if (avatar) fields.avatar.src = avatar;
+  fields.avatar.alt = bot.name || config.name;
+  setBotStatusDot(entry, status);
+  setText(fields.name, bot.name || config.name);
+  setText(fields.customStatus, bot.customStatus || config.description || 'Discord Bot');
+  setText(fields.ping, `${music.ping ?? '--'}ms`);
+  setText(fields.servers, music.servers ?? '--');
+  setText(fields.playing, `${music.playingRooms ?? '--'} phòng`);
+  setText(fields.connected, `${music.connectedRooms ?? '--'} phòng`);
+  setText(fields.runtime, music.runtime || '--');
+  setText(fields.lavalink, lavalinkText);
+  setText(fields.updatedAt, formatUpdatedAt(data.updatedAt));
+  setBotInvite(entry, bot.inviteUrl || config.inviteUrl);
 }
 
-function renderBotStatusError() {
-  setBotStatusDot('offline');
-  setText(botPage.statusText, 'OFFLINE • Không kết nối được API');
-  setText(botPage.customStatus, 'Kiểm tra lại xem bot có đang chạy không!');
-  setText(botPage.updatedAt, 'API chưa phản hồi');
+function renderBotStatusError(entry) {
+  setBotStatusDot(entry, 'offline');
+  setText(entry.fields.customStatus, entry.config.description || 'Discord Bot');
+  setText(entry.fields.updatedAt, 'API chưa phản hồi');
 }
 
 async function requestBotStatus(endpoint) {
-  const response = await fetch(`${endpoint}?t=${Date.now()}`, { cache: 'no-store' });
-  if (!response.ok) throw new Error(`Status ${response.status}`);
-  const data = await response.json();
-  if (!data.ok) throw new Error(data.message || 'Bot API not ready');
-  activeBotStatusApi = endpoint;
-  return data;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 6000);
+  try {
+    const url = new URL(endpoint, window.location.href);
+    url.searchParams.set('t', String(Date.now()));
+    const response = await fetch(url.href, { cache: 'no-store', signal: controller.signal });
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+    const data = await response.json();
+    if (!data.ok) throw new Error(data.message || 'Bot API not ready');
+    return data;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
-async function fetchBotStatus() {
+async function fetchBotStatus(entry) {
+  if (entry.pending || !entry.config.endpoints?.length) return;
+  entry.pending = true;
   try {
-    const endpoints = activeBotStatusApi
-      ? [activeBotStatusApi, ...BOT_STATUS_ENDPOINTS.filter(endpoint => endpoint !== activeBotStatusApi)]
-      : BOT_STATUS_ENDPOINTS;
+    const endpoints = entry.activeEndpoint
+      ? [entry.activeEndpoint, ...entry.config.endpoints.filter(endpoint => endpoint !== entry.activeEndpoint)]
+      : entry.config.endpoints;
     let lastError = null;
 
     for (const endpoint of endpoints) {
+      if (!botPage.page.classList.contains('active')) return;
       try {
         const data = await requestBotStatus(endpoint);
-        renderBotStatus(data);
+        entry.activeEndpoint = endpoint;
+        renderBotStatus(entry, data);
         return;
       } catch (error) {
         lastError = error;
@@ -1084,15 +1264,18 @@ async function fetchBotStatus() {
 
     throw lastError || new Error('No bot API endpoint responded');
   } catch (error) {
-    console.warn('Bot status fetch failed:', error);
-    renderBotStatusError();
+    console.warn(`Bot status fetch failed (${entry.config.id}):`, error);
+    renderBotStatusError(entry);
+  } finally {
+    entry.pending = false;
   }
 }
 
 function startBotStatusPolling() {
-  fetchBotStatus();
   clearInterval(botStatusTimer);
-  botStatusTimer = setInterval(fetchBotStatus, BOT_STATUS_REFRESH_MS);
+  const refresh = () => botEntries.forEach(entry => { void fetchBotStatus(entry); });
+  refresh();
+  botStatusTimer = setInterval(refresh, BOT_STATUS_REFRESH_MS);
 }
 
 function stopBotStatusPolling() {
@@ -1101,12 +1284,12 @@ function stopBotStatusPolling() {
 }
 
 function showBotPage() {
-  showInnerPage(botPage.page, startBotStatusPolling);
+  document.querySelector('.nav-tab-btn[data-tab="bot"]')?.click();
 }
 
 function hideBotPage() {
   stopBotStatusPolling();
-  hideInnerPage(botPage.page);
+  document.querySelector('.nav-tab-btn[data-tab="board"]')?.click();
 }
 
 if (colorTool.open) colorTool.open.addEventListener('click', (event) => { event.preventDefault(); showColorPage(); });
@@ -1350,12 +1533,11 @@ navTabBtns.forEach((btn) => {
     if (targetContent) {
       targetContent.classList.add('active');
     }
-    if (targetTab === 'colorizer') {
-      buildUnityRichText();
-    } else if (targetTab === 'bot') {
+    if (targetTab === 'bot') {
       startBotStatusPolling();
     } else {
       stopBotStatusPolling();
+      if (targetTab === 'colorizer') buildUnityRichText();
     }
   });
 });
