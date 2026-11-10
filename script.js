@@ -121,7 +121,8 @@ function dismissSiteLoader() {
   siteLoader.classList.add('is-leaving');
   window.setTimeout(() => {
     siteLoader.hidden = true;
-    startTerminalIntro();
+    // startTerminalIntro(); // CMD intro disabled; keep source for later.
+    startProfile();
   }, 460);
 }
 
@@ -319,7 +320,15 @@ function startTerminalIntro() {
   typeIntro();
 }
 
-if (!siteLoader) startTerminalIntro();
+function startProfile() {
+  document.body.classList.remove('site-loading');
+  if (appRoot) appRoot.inert = false;
+  showScreen(profileScreen);
+  void playMusic();
+}
+
+// if (!siteLoader) startTerminalIntro();
+if (!siteLoader) window.setTimeout(startProfile, 0);
 
 function showScreen(screen) {
   [terminalScreen, profileScreen].forEach((item) => item.classList.remove('active'));
