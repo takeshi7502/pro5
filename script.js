@@ -24,6 +24,40 @@ const cmdInput = document.getElementById('cmd-input');
 const siteLoader = document.getElementById('site-loader');
 const appRoot = document.getElementById('app-root');
 
+fetch('./ss.txt')
+  .then((response) => {
+    if (!response.ok) throw new Error('Cannot load slide text');
+    return response.text();
+  })
+  .then((text) => {
+    const content = text.replace(/\s+/g, ' ').trim();
+    if (!content) return;
+    const slide = document.getElementById('story-slide');
+    const track = document.getElementById('story-track');
+    const original = document.getElementById('story-text');
+    const viewport = slide.querySelector('.story-viewport');
+    original.textContent = content;
+    slide.hidden = false;
+    let animation;
+    const sizeSlide = () => {
+      animation?.cancel();
+      if (!viewport.clientWidth) return;
+      const start = 0;
+      const end = -track.scrollWidth;
+      const travelTime = (start - end) / 55 * 1000;
+      const duration = travelTime + 10000;
+      animation = track.animate([
+        { transform: `translateX(${start}px)`, offset: 0 },
+        { transform: `translateX(${end}px)`, offset: travelTime / duration },
+        { transform: `translateX(${end}px)`, offset: 1 },
+      ], { duration, iterations: Infinity });
+    };
+    sizeSlide();
+    document.fonts?.ready.then(sizeSlide);
+    new ResizeObserver(sizeSlide).observe(viewport);
+  })
+  .catch((error) => console.warn('Unable to load slide text:', error));
+
 const musicPlayer = {
   audio: document.getElementById('audio-player'),
   play: document.getElementById('music-play'),
@@ -35,6 +69,7 @@ const musicPlayer = {
   next: document.getElementById('music-next'),
   volumeNotice: document.getElementById('music-volume-notice'),
   volumeNoticeTimer: null,
+  awaitingInteraction: false,
   trackIndex: 0,
   tracks: [
     { title: 'Waku Waku Song || Anya', src: './data/music/wakusong.mp3', loop: true },
@@ -164,10 +199,12 @@ function syncMusicState() {
 async function playMusic() {
   const { audio } = musicPlayer;
   if (!audio) return;
+  musicPlayer.awaitingInteraction = false;
   try {
     await audio.play();
   } catch (error) {
-    console.warn('Music playback could not start:', error);
+    if (error.name === 'NotAllowedError') musicPlayer.awaitingInteraction = true;
+    else if (error.name !== 'AbortError') console.warn('Music playback could not start:', error);
   }
   syncMusicState();
 }
@@ -231,6 +268,16 @@ function initMusicPlayer() {
 }
 
 initMusicPlayer();
+
+function retryMusicOnInteraction(event) {
+  if (!musicPlayer.awaitingInteraction || !profileScreen.classList.contains('active')) return;
+  // Music controls already handle their own playback gesture.
+  if (event.target instanceof Element && event.target.closest('.music-dock')) return;
+  if (event.type === 'keydown' && (event.repeat || event.ctrlKey || event.altKey || event.metaKey || [' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key))) return;
+  void playMusic();
+}
+document.addEventListener('click', retryMusicOnInteraction);
+document.addEventListener('keydown', retryMusicOnInteraction);
 
 document.addEventListener('keydown', (event) => {
   if (!profileScreen.classList.contains('active') || event.defaultPrevented || event.repeat || event.isComposing || event.ctrlKey || event.altKey || event.metaKey) return;
@@ -525,31 +572,6 @@ function findCustomStatus(activities = []) {
   return activities.find((activity) => activity.type === 4);
 }
 
-function findPrimaryActivity(activities = []) {
-  return activities.find((activity) => activity.type !== 4);
-}
-
-function describeActivity(activity, spotify) {
-  if (spotify) {
-    return {
-      visible: true,
-      icon: '♪',
-      name: `Spotify · ${spotify.song || 'Đang nghe nhạc'}`,
-      detail: [spotify.artist, spotify.album].filter(Boolean).join(' · ') || 'Đang phát qua Spotify.',
-    };
-  }
-
-  if (!activity) return { visible: false, icon: '✦', name: '', detail: '', time: '' };
-  const meta = activityTypes[activity.type] || { label: 'Hoạt động', icon: '✦' };
-  return {
-    visible: true,
-    icon: meta.icon,
-    name: `${meta.label} ${activity.name || ''}`.trim(),
-    detail: [activity.details, activity.state].filter(Boolean).join(' · ') || 'Hoạt động đang chạy.',
-    time: getElapsedText(activity.timestamps),
-  };
-}
-
 function getClientText(data) {
   return [
     data.active_on_discord_desktop && 'Desktop',
@@ -563,13 +585,58 @@ function getCustomStatusText(activity) {
   return [getEmojiText(activity.emoji), activity.state].filter(Boolean).join(' ').trim();
 }
 
-function updateActivityCard(activity) {
-  presenceEls.activityCard.classList.toggle('hidden', !activity.visible);
-  if (!activity.visible) return;
-  presenceEls.activityIcon.textContent = activity.icon;
-  presenceEls.activityName.textContent = activity.name;
-  presenceEls.activityDetail.textContent = activity.detail;
-  presenceEls.activityTime.textContent = activity.time;
+const applicationIcons = new Map();
+async function getApplicationIcon(applicationId) {
+  if (!/^\d+$/.test(applicationId || '')) return '';
+  if (!applicationIcons.has(applicationId)) {
+    applicationIcons.set(applicationId, fetch(`https://discord.com/api/v10/applications/${applicationId}/rpc`)
+      .then((response) => response.ok ? response.json() : null)
+      .then((app) => /^[a-f0-9]+$/.test(app?.icon || '') ? `https://cdn.discordapp.com/app-icons/${applicationId}/${app.icon}.png?size=128` : '')
+      .catch(() => ''));
+  }
+  return applicationIcons.get(applicationId);
+}
+
+function updateActivityCard(activities = []) {
+  const cards = activities.filter((activity) => activity.type !== 4 && activity.name !== 'Spotify').map((activity) => {
+    const meta = activityTypes[activity.type] || { label: 'Hoạt động', icon: '✦' };
+    const card = document.createElement('section');
+    card.className = 'activity-card';
+    const icon = document.createElement('div');
+    icon.className = 'activity-icon';
+    icon.textContent = meta.icon;
+    const asset = activity.assets?.large_image;
+    let imageUrl = '';
+    if (/^\d+$/.test(activity.application_id || '') && /^[a-zA-Z0-9_]+$/.test(asset || '')) {
+      imageUrl = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${asset}.png`;
+    } else if (/^mp:external\/[a-zA-Z0-9_\-/%.]+$/.test(asset || '')) {
+      imageUrl = `https://media.discordapp.net/${asset.slice(3)}`;
+    }
+    const showImage = (url) => {
+      if (!url) return;
+      const image = document.createElement('img');
+      image.alt = activity.assets?.large_text || activity.name || '';
+      image.onload = () => icon.replaceChildren(image);
+      image.onerror = () => {
+        if (url === imageUrl) void getApplicationIcon(activity.application_id).then(showImage);
+      };
+      image.src = url;
+    };
+    if (imageUrl) showImage(imageUrl);
+    else void getApplicationIcon(activity.application_id).then(showImage);
+    const body = document.createElement('div');
+    const title = document.createElement('h2');
+    title.textContent = `${meta.label} ${activity.name || ''}`.trim();
+    const detail = document.createElement('p');
+    detail.textContent = [activity.details, activity.state].filter(Boolean).join(' · ');
+    const time = document.createElement('p');
+    time.className = 'activity-time';
+    time.textContent = getElapsedText(activity.timestamps);
+    body.append(title, detail, time);
+    card.append(icon, body);
+    return card;
+  });
+  presenceEls.activityCard.replaceChildren(...cards);
 }
 
 const clanBadge = document.getElementById('clan-badge');
@@ -603,43 +670,15 @@ function renderDiscordBadges(user) {
     }
   }
 
-  // 2. Discord Nitro badge (detected from avatar decoration or animated avatar)
-  const hasNitro = Boolean(
-    user?.avatar_decoration_data ||
-    user?.avatar?.startsWith('a_') ||
-    user?.banner?.startsWith('a_')
+  // Fixed profile badges supplement the badges synced from public_flags.
+  badges.push(
+    { name: 'Thuê bao Discord Nitro', icon: './data/badges/nitro-new.svg', nitro: true },
+    { name: 'Server Booster', icon: './data/badges/boost-6-month.svg', nitro: true },
+    { name: 'Nguyên bản là takeshi7502#7502', icon: './data/badges/legacy-username.svg', nitro: false },
   );
 
-  if (hasNitro) {
-    badges.push({
-      name: 'Thuê bao Discord Nitro',
-      icon: './data/badges/nitro-new.svg',
-      nitro: true,
-    });
-    badges.push({
-      name: 'Server Booster',
-      icon: './data/badges/boost-6-month.svg',
-      nitro: true,
-    });
-  }
-
-  // 3. Legacy Username badge
-  if (user?.discriminator === '0' || user?.username) {
-    const legacyName = user?.username ? `${user.username}#7502` : 'takeshi#7502';
-    badges.push({
-      name: `Nguyên bản là ${legacyName}`,
-      icon: './data/badges/legacy-username.svg',
-      nitro: false,
-    });
-  }
-
-  if (!badges.length) {
-    presenceEls.publicFlags.innerHTML = '<span class="discord-badge empty">Không có huy hiệu</span>';
-    return;
-  }
-
   presenceEls.publicFlags.innerHTML = badges.map((badge) => `
-    <span class="discord-badge ${badge.nitro ? 'nitro' : ''}" data-tooltip="${badge.name}" aria-label="${badge.name}">
+    <span class="discord-badge ${badge.nitro ? 'nitro' : ''}" tabindex="0" data-tooltip="${badge.name}" aria-label="${badge.name}">
       <img src="${badge.icon}" alt="${badge.name}">
     </span>
   `).join('');
@@ -668,10 +707,43 @@ function updateClanBadge(primaryGuild) {
   }
 }
 
+let spotifyTimestamps = null;
+function updateSpotifyProgress() {
+  const start = spotifyTimestamps?.start;
+  const end = spotifyTimestamps?.end;
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return;
+  const elapsed = Math.max(0, Math.min(end - start, Date.now() - start));
+  document.getElementById('spotify-progress').value = elapsed / (end - start);
+  document.getElementById('spotify-time').textContent = `${formatMediaTime(elapsed / 1000)} / ${formatMediaTime((end - start) / 1000)}`;
+}
+setInterval(updateSpotifyProgress, 1000);
+
 function updateMetaFields(data, user) {
   presenceEls.spotifyStatus.textContent = data.listening_to_spotify && data.spotify
     ? `${data.spotify.song || 'Spotify'} · ${data.spotify.artist || 'Unknown'}`
     : 'Chưa phát hiện';
+  const spotify = data.listening_to_spotify ? data.spotify : null;
+  document.getElementById('spotify-details').hidden = !spotify;
+  spotifyTimestamps = spotify?.timestamps || null;
+  if (spotify) {
+    const art = document.getElementById('spotify-art');
+    const artUrl = spotify.album_art_url || '';
+    art.hidden = !/^https:\/\/i\.scdn\.co\//.test(artUrl);
+    if (!art.hidden) art.src = artUrl;
+    document.getElementById('spotify-album').textContent = spotify.album || '';
+    const link = document.getElementById('spotify-link');
+    link.hidden = !/^[a-zA-Z0-9]+$/.test(spotify.track_id || '');
+    if (!link.hidden) link.href = `https://open.spotify.com/track/${spotify.track_id}`;
+    document.getElementById('spotify-progress').value = 0;
+    document.getElementById('spotify-time').textContent = '';
+    updateSpotifyProgress();
+  }
+  const identity = document.getElementById('identity-section');
+  const nameplate = user?.collectibles?.nameplate?.asset || '';
+  const hasNameplate = /^nameplates\/[a-zA-Z0-9_-]+\/\d+\/$/.test(nameplate);
+  identity.classList.toggle('has-nameplate', hasNameplate);
+  if (hasNameplate) identity.style.setProperty('--nameplate', `url("https://cdn.discordapp.com/${nameplate}asset.png")`);
+  else identity.style.removeProperty('--nameplate');
   renderDiscordBadges(user);
   updateClanBadge(user?.primary_guild);
 }
@@ -761,19 +833,12 @@ function startProfileNameTyping() {
 
 startProfileNameTyping();
 
-async function fetchDiscordPresence() {
-  try {
-    const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`, { cache: 'no-store' });
-    const payload = await response.json();
-    if (!payload.success) throw new Error('Lanyard returned unsuccessful response');
-
-    const data = payload.data;
+function renderDiscordPresence(data) {
     const user = data.discord_user;
     const status = setStatusClass(data.discord_status);
     const statusLabel = statusLabels[status] || 'Đang offline';
     const clientText = getClientText(data);
     const customStatusText = getCustomStatusText(findCustomStatus(data.activities));
-    const primaryActivity = describeActivity(findPrimaryActivity(data.activities), data.listening_to_spotify ? data.spotify : null);
     const avatarUrl = getAvatarUrl(user);
     const discordDecorationUrls = getDiscordDecorationUrls(user);
 
@@ -795,9 +860,18 @@ async function fetchDiscordPresence() {
 
     setDiscordDecoration(discordDecorationUrls);
 
-    updateActivityCard(primaryActivity);
+    updateActivityCard(data.activities);
     updateMetaFields(data, user);
+}
+
+async function fetchDiscordPresence() {
+  try {
+    const response = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`, { cache: 'no-store' });
+    const payload = await response.json();
+    if (!response.ok || !payload.success) throw new Error('Lanyard returned unsuccessful response');
+    if (!lanyardConnected) renderDiscordPresence(payload.data);
   } catch (error) {
+    if (lanyardConnected) return;
     console.warn('Unable to retrieve Discord presence:', error);
     const status = setStatusClass('offline');
     presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>Chưa thể đồng bộ Discord`;
@@ -809,11 +883,34 @@ async function fetchDiscordPresence() {
     }
     updateVietnamClock();
     presenceEls.spotifyStatus.textContent = 'Không rõ';
-    presenceEls.publicFlags.innerHTML = '<span class="discord-badge empty">Không rõ</span>';
+    renderDiscordBadges(null);
   }
 }
+let lanyardConnected = false;
 fetchDiscordPresence();
-setInterval(fetchDiscordPresence, 6000);
+function connectLanyard() {
+  const socket = new WebSocket('wss://api.lanyard.rest/socket');
+  let heartbeat;
+  socket.addEventListener('message', (event) => {
+    let message;
+    try { message = JSON.parse(event.data); } catch { return; }
+    if (message.op === 1) {
+      socket.send(JSON.stringify({ op: 2, d: { subscribe_to_id: DISCORD_USER_ID } }));
+      heartbeat = setInterval(() => socket.send(JSON.stringify({ op: 3 })), message.d.heartbeat_interval);
+    } else if (message.op === 0 && (message.t === 'INIT_STATE' || message.t === 'PRESENCE_UPDATE') && message.d?.discord_user) {
+      lanyardConnected = true;
+      renderDiscordPresence(message.d);
+    }
+  });
+  socket.addEventListener('error', () => socket.close());
+  socket.addEventListener('close', () => {
+    lanyardConnected = false;
+    clearInterval(heartbeat);
+    setTimeout(connectLanyard, 5000);
+  });
+}
+connectLanyard();
+setInterval(() => { if (!lanyardConnected) void fetchDiscordPresence(); }, 6000);
 
 function rotateDecoration() {
   if (presenceEls.decoration.dataset.source === 'discord') return;
@@ -870,15 +967,11 @@ const BOT_CATALOG = [
   {
     id: 'tekisha-music',
     topic: 'Music Discord bot',
-    name: 'Tekisha Music',
+    name: 'AniMusic',
     description: 'Playing Music',
     avatar: './data/waku.jpg',
     endpoints: BOT_STATUS_ENDPOINTS,
-    features: [
-      { title: 'Music-first', description: 'Tập trung phát nhạc, queue và trải nghiệm nghe gọn nhẹ.' },
-      { title: 'Realtime status', description: 'Dữ liệu lấy trực tiếp từ API của source bot đang chạy.' },
-      { title: 'Server friendly', description: 'Landing page nhẹ để review và mời bot vào server.' },
-    ],
+    inviteUrl: 'https://discord.com/oauth2/authorize?client_id=1147101590910685194&permissions=277083450689&scope=bot%20applications.commands',
   },
   {
     id: 'mirror-telegram',
@@ -890,14 +983,12 @@ const BOT_CATALOG = [
     tags: ['Mirror & Leech', 'Tải đa nguồn', 'Drive / Rclone'],
     inviteLabel: 'Thêm bot vào nhóm ↗',
     inviteUrl: 'https://t.me/jinmups_bot?startgroup',
-    sourceRepo: 'https://github.com/takeshi7502/wzml',
   },
   {
     id: 'waku-ai',
     topic: 'Waku AI chat bot',
     introduction: 'Waku là bot chat AI trên Discord và Telegram, dùng chung cấu hình AI giữa hai nền tảng. Trò chuyện bằng tiếng Việt, hỗ trợ AI agent và các tiện ích quản lý nhóm trên Telegram — chọn nền tảng bạn muốn dùng ở bên dưới.',
     tags: ['Chat AI', 'Tiếng Việt', 'Hai nền tảng'],
-    sourceRepo: 'https://github.com/TakeshiBot/waku-bot/',
     platforms: [
       {
         name: 'Waku',
@@ -1145,7 +1236,6 @@ function createBotEntry(config) {
   setText(fields.customStatus, config.description || 'Bot');
   configureBotAvatar(fields.avatar, config.avatar, config.name);
   setBotInvite(entry, config.inviteUrl);
-  setBotAction(fields.sourceRepo, config.sourceRepo, null, true);
   setBotStatusDot(entry, config.status || 'offline');
   const live = Boolean(config.endpoints?.length);
   if (fields.statusDot) fields.statusDot.hidden = !live;
@@ -1167,18 +1257,6 @@ function createBotEntry(config) {
   });
   root.querySelector('.bot-details').id = `bot-details-${config.id}`;
   root.querySelector('summary').setAttribute('aria-controls', `bot-details-${config.id}`);
-  if (fields.features) fields.features.hidden = !config.features?.length;
-  (fields.features ? config.features || [] : []).forEach((feature, index) => {
-    const article = document.createElement('article');
-    const number = document.createElement('span');
-    const title = document.createElement('strong');
-    const description = document.createElement('p');
-    number.textContent = String(index + 1).padStart(2, '0');
-    title.textContent = feature.title;
-    description.textContent = feature.description;
-    article.append(number, title, description);
-    fields.features.append(article);
-  });
   root.addEventListener('toggle', () => {
     if (root.open && botPage.page.classList.contains('active')) void fetchBotStatus(entry);
   });
@@ -1214,9 +1292,9 @@ function renderBotStatus(entry, data) {
 
   const avatar = safeBotUrl(bot.avatar);
   if (avatar) fields.avatar.src = avatar;
-  fields.avatar.alt = bot.name || config.name;
+  fields.avatar.alt = config.name;
   setBotStatusDot(entry, status);
-  setText(fields.name, bot.name || config.name);
+  setText(fields.name, config.name);
   setText(fields.customStatus, bot.customStatus || config.description || 'Discord Bot');
   setText(fields.ping, `${music.ping ?? '--'}ms`);
   setText(fields.servers, music.servers ?? '--');

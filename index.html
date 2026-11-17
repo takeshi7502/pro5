@@ -82,7 +82,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20261012-my-bot-compact" />
+  <link rel="stylesheet" href="styles.css?v=20261118-icons-badges" />
 
   <!-- Vercel Web Analytics -->
   <script>
@@ -134,6 +134,12 @@
     </section>
 
     <section id="profile-screen" class="screen profile-screen" aria-label="Trang hồ sơ chính">
+      <div class="profile-layout">
+      <div id="story-slide" class="story-slide" hidden>
+        <div class="story-viewport" aria-label="Nội dung trích dẫn">
+          <div id="story-track" class="story-track"><span id="story-text"></span></div>
+        </div>
+      </div>
       <div class="profile-stack">
       <article class="profile-console glass-panel collapsed">
         <!-- BEGIN: Left Profile Column -->
@@ -161,7 +167,7 @@
               <span id="last-updated" class="sync-clock">VN --:--:--</span>
             </div>
 
-            <div class="identity-section">
+            <div class="identity-section" id="identity-section">
               <h1 id="display-name"><span id="profile-typing-name" class="profile-typing-name">Takeshi</span><span class="profile-typing-cursor" aria-hidden="true">|</span></h1>
               <div class="handle-bar">
                 <span class="username">@<span id="username">takeshi7502</span></span>
@@ -203,7 +209,7 @@
           <div class="profile-scroll-body">
             <div class="info-section">
               <div class="section-label">Tiểu sử</div>
-              <p class="bio-text">Một góc hồ sơ nhỏ gọn của Takeshi, lấy cảm hứng nhẹ từ Discord nhưng vẫn giữ phong cách anime riêng.</p>
+              <p class="bio-text">Một góc hồ sơ nhỏ gọn của Takeshi.</p>
               <div class="tags" aria-label="Thẻ hồ sơ">
                 <span>Anime</span>
                 <span>Music</span>
@@ -343,15 +349,7 @@
 
             <!-- TAB 2: Hoạt động (Realtime Activities) -->
             <div id="tab-activity" class="tab-content" role="tabpanel">
-              <section id="activity-card" class="activity-card hidden" aria-labelledby="activity-title">
-                <div id="activity-icon" class="activity-icon">✦</div>
-                <div>
-                  <h2 id="activity-title">Hoạt động đang chạy</h2>
-                  <p id="activity-name" class="handle">Không có hoạt động</p>
-                  <p id="activity-detail">Khi có game, Spotify hoặc app đang chạy thì sẽ hiện ở đây.</p>
-                  <p id="activity-time" class="activity-time"></p>
-                </div>
-              </section>
+              <div id="activity-card" aria-label="Hoạt động đang chạy"></div>
 
               <div class="realtime-spotify-card">
                 <div class="spotify-header">
@@ -359,6 +357,15 @@
                   <span>Spotify Realtime</span>
                 </div>
                 <strong id="spotify-status" class="spotify-song">Chưa phát hiện</strong>
+                <div id="spotify-details" class="spotify-details" hidden>
+                  <img id="spotify-art" class="spotify-art" alt="" />
+                  <div class="spotify-info">
+                    <span id="spotify-album"></span>
+                    <progress id="spotify-progress" max="1" value="0" aria-label="Tiến độ Spotify"></progress>
+                    <span id="spotify-time"></span>
+                    <a id="spotify-link" target="_blank" rel="noopener noreferrer">Mở trên Spotify ↗</a>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -488,7 +495,6 @@
                     </div>
                     <div class="bot-actions">
                       <a class="invite-btn disabled" data-bot-field="invite" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1">Thêm bot vào server</a>
-                      <a class="bot-source-link" data-bot-field="sourceRepo" href="#" target="_blank" rel="noopener noreferrer" hidden>Source repo ↗</a>
                       <span class="bot-note" data-bot-field="updatedAt">Chưa cập nhật</span>
                     </div>
                     <div class="bot-live-grid" data-bot-field="stats" aria-label="Thông số bot">
@@ -499,7 +505,6 @@
                       <article class="wide"><span>Runtime</span><strong data-bot-field="runtime">--</strong></article>
                       <article class="wide"><span>Lavalink</span><strong data-bot-field="lavalink">--</strong></article>
                     </div>
-                    <div class="bot-feature-grid" data-bot-field="features"></div>
                   </div>
                 </details>
               </template>
@@ -545,9 +550,6 @@
                         <a class="invite-btn" data-bot-field="rightInvite" href="#" target="_blank" rel="noopener noreferrer">Chat với Waku ↗</a>
                       </div>
                     </div>
-                    <div class="bot-actions bot-shared-actions">
-                      <a class="bot-source-link" data-bot-field="sourceRepo" href="#" target="_blank" rel="noopener noreferrer">Source repo ↗</a>
-                    </div>
                   </div>
                 </details>
               </template>
@@ -586,12 +588,13 @@
         </div>
       </section>
       </div>
+      </div>
       <!-- Mobile Panel Backdrop -->
       <div id="mobilePanelBackdrop" class="mobile-panel-backdrop"></div>
     </section>
   </main>
 
-  <script src="script.js?v=20261111-skip-cmd"></script>
+  <script src="script.js?v=20261118-music-bots"></script>
 </body>
 
 </html>
