@@ -878,6 +878,8 @@ function renderDiscordPresence(data) {
     presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>${statusLabel}`;
     const platformDisplay = clientText || (status === 'offline' ? 'Offline' : 'Online');
     presenceEls.clientPlatformText.textContent = platformDisplay;
+    presenceEls.clientPlatformBtn.title = `Nền tảng Discord: ${platformDisplay}`;
+    presenceEls.clientPlatformBtn.setAttribute('aria-label', presenceEls.clientPlatformBtn.title);
     if (presenceEls.clientPlatformBtn) {
       const svgDot = presenceEls.clientPlatformBtn.querySelector('svg circle');
       if (svgDot) {
@@ -907,6 +909,8 @@ async function fetchDiscordPresence() {
     presenceEls.statusText.innerHTML = `<span class="inline-dot ${status}"></span>Chưa thể đồng bộ Discord`;
     presenceEls.customStatusLine.textContent = '...';
     presenceEls.clientPlatformText.textContent = 'Offline';
+    presenceEls.clientPlatformBtn.title = 'Nền tảng Discord: Offline';
+    presenceEls.clientPlatformBtn.setAttribute('aria-label', presenceEls.clientPlatformBtn.title);
     if (presenceEls.clientPlatformBtn) {
       const svgDot = presenceEls.clientPlatformBtn.querySelector('svg circle');
       if (svgDot) svgDot.setAttribute('fill', '#80848e');
@@ -1787,6 +1791,9 @@ const urlAnimator = {
       } else {
         btnLabel.textContent = this.mode.toUpperCase();
       }
+      const button = document.getElementById('url-effect-btn');
+      button.title = `Hiệu ứng URL: ${btnLabel.textContent}. Bấm để đổi kiểu.`;
+      button.setAttribute('aria-label', button.title);
     }
   },
 };
