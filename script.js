@@ -24,6 +24,49 @@ const cmdInput = document.getElementById('cmd-input');
 const siteLoader = document.getElementById('site-loader');
 const appRoot = document.getElementById('app-root');
 
+const backgroundNames = ['furi', 'miwano_rag', 'poti', 'sakimori'];
+const backgroundMobile = window.matchMedia('(max-width: 600px)');
+const backgroundPortrait = window.matchMedia('(orientation: portrait)');
+let backgroundIndex = 0;
+let backgroundBusy = false;
+
+async function changeBackground(index) {
+  if (backgroundBusy) return;
+  backgroundBusy = true;
+  const size = backgroundMobile.matches ? '1290x2796' : backgroundPortrait.matches ? '1920x2160' : '1920x1080';
+  const url = `./data/background/${size}-${backgroundNames[index]}.png`;
+  let transition;
+  try {
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    const layer = document.getElementById('background-next');
+    // Reveal the loaded image from left to right; keep the old one underneath.
+    layer.style.backgroundImage = `var(--background-shade), url("${url}")`;
+    transition = layer.animate([
+      { opacity: 1, clipPath: 'inset(0 100% 0 0)' },
+      { opacity: 1, clipPath: 'inset(0 0% 0 0)' },
+    ], { duration: 1400, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+    await transition.finished;
+    document.body.style.setProperty('--background-current', `url("${url}")`);
+    backgroundIndex = index;
+  } catch (error) {
+    console.warn('Unable to change background:', error);
+  } finally {
+    transition?.cancel();
+    backgroundBusy = false;
+  }
+}
+
+void changeBackground(0);
+setInterval(() => {
+  if (!document.hidden && profileScreen.classList.contains('active')) {
+    void changeBackground((backgroundIndex + 1) % backgroundNames.length);
+  }
+}, 10000);
+backgroundMobile.addEventListener('change', () => { void changeBackground(backgroundIndex); });
+backgroundPortrait.addEventListener('change', () => { void changeBackground(backgroundIndex); });
+
 fetch('./ss.txt')
   .then((response) => {
     if (!response.ok) throw new Error('Cannot load slide text');
@@ -69,7 +112,6 @@ const musicPlayer = {
   next: document.getElementById('music-next'),
   volumeNotice: document.getElementById('music-volume-notice'),
   volumeNoticeTimer: null,
-  awaitingInteraction: false,
   trackIndex: 0,
   tracks: [
     { title: 'Waku Waku Song || Anya', src: './data/music/wakusong.mp3', loop: true },
@@ -199,12 +241,10 @@ function syncMusicState() {
 async function playMusic() {
   const { audio } = musicPlayer;
   if (!audio) return;
-  musicPlayer.awaitingInteraction = false;
   try {
     await audio.play();
   } catch (error) {
-    if (error.name === 'NotAllowedError') musicPlayer.awaitingInteraction = true;
-    else if (error.name !== 'AbortError') console.warn('Music playback could not start:', error);
+    if (error.name !== 'AbortError') console.warn('Music playback could not start:', error);
   }
   syncMusicState();
 }
@@ -235,6 +275,7 @@ function changeMusicVolume(direction) {
 async function changeMusicTrack(direction) {
   const { audio, tracks, title } = musicPlayer;
   if (!audio) return;
+  const wasPlaying = !audio.paused;
   musicPlayer.trackIndex = (musicPlayer.trackIndex + direction + tracks.length) % tracks.length;
   const track = tracks[musicPlayer.trackIndex];
   if (title) title.textContent = track.title;
@@ -242,7 +283,7 @@ async function changeMusicTrack(direction) {
   audio.src = track.src;
   audio.load();
   syncMusicState();
-  await playMusic();
+  if (wasPlaying) await playMusic();
 }
 
 function initMusicPlayer() {
@@ -268,16 +309,6 @@ function initMusicPlayer() {
 }
 
 initMusicPlayer();
-
-function retryMusicOnInteraction(event) {
-  if (!musicPlayer.awaitingInteraction || !profileScreen.classList.contains('active')) return;
-  // Music controls already handle their own playback gesture.
-  if (event.target instanceof Element && event.target.closest('.music-dock')) return;
-  if (event.type === 'keydown' && (event.repeat || event.ctrlKey || event.altKey || event.metaKey || [' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key))) return;
-  void playMusic();
-}
-document.addEventListener('click', retryMusicOnInteraction);
-document.addEventListener('keydown', retryMusicOnInteraction);
 
 document.addEventListener('keydown', (event) => {
   if (!profileScreen.classList.contains('active') || event.defaultPrevented || event.repeat || event.isComposing || event.ctrlKey || event.altKey || event.metaKey) return;
@@ -371,7 +402,6 @@ function startProfile() {
   document.body.classList.remove('site-loading');
   if (appRoot) appRoot.inert = false;
   showScreen(profileScreen);
-  void playMusic();
 }
 
 // if (!siteLoader) startTerminalIntro();
@@ -672,9 +702,9 @@ function renderDiscordBadges(user) {
 
   // Fixed profile badges supplement the badges synced from public_flags.
   badges.push(
-    { name: 'Thuê bao Discord Nitro', icon: './data/badges/nitro-new.svg', nitro: true },
+    { name: 'Discord Nitro', icon: './data/badges/nitro-new.svg', nitro: true },
     { name: 'Server Booster', icon: './data/badges/boost-6-month.svg', nitro: true },
-    { name: 'Nguyên bản là takeshi7502#7502', icon: './data/badges/legacy-username.svg', nitro: false },
+    { name: 'Legacy Username takeshi#7502', icon: './data/badges/legacy-username.svg', nitro: false },
   );
 
   presenceEls.publicFlags.innerHTML = badges.map((badge) => `
@@ -922,8 +952,6 @@ function enterConsole() {
   if (document.body.classList.contains('site-loading') || !terminalScreen.classList.contains('active')) return;
   if (introTimer) clearInterval(introTimer);
   showScreen(profileScreen);
-  // Keep play() in the Join World / Enter gesture so browsers allow audio.
-  void playMusic();
 }
 
 ['page-one-link', 'page-two-link'].forEach((id) => {

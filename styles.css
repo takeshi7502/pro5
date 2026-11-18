@@ -18,6 +18,8 @@
 html { scroll-behavior: smooth; scrollbar-width: none; background:#060913; }
 html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar { width:0; height:0; display:none; }
 body {
+  isolation: isolate; /* Keep negative background layers above the body's own background. */
+  --background-shade: linear-gradient(145deg, rgba(3,5,11,.68), rgba(8,12,24,.86));
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
@@ -30,8 +32,8 @@ body {
   text-rendering: optimizeLegibility;
   background-color: var(--bg);
   background-image:
-    linear-gradient(145deg, rgba(3, 5, 11, 0.68), rgba(8, 12, 24, 0.86)),
-    url('./data/background/bg-960.jpg');
+    var(--background-shade),
+    var(--background-current, url('./data/background/bg-960.jpg'));
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
@@ -45,8 +47,8 @@ body::before {
   pointer-events:none;
   background-color: var(--bg);
   background-image:
-    linear-gradient(145deg, rgba(3, 5, 11, 0.68), rgba(8, 12, 24, 0.86)),
-    url('./data/background/bg-960.jpg');
+    var(--background-shade),
+    var(--background-current, url('./data/background/bg-960.jpg'));
   background-position:center;
   background-size:cover;
   background-repeat:no-repeat;
@@ -65,6 +67,7 @@ body::after {
   background-size: 48px 48px;
   mask-image: radial-gradient(circle, #000 18%, transparent 78%);
 }
+#background-next { position: fixed; inset: -2px; z-index: -5; pointer-events: none; opacity: 0; background-position: center; background-size: cover; background-repeat: no-repeat; }
 .pointer-glow { display: none !important; }
 body.pointer-active .pointer-glow { display: none !important; }
 .page-ripple, .hover-ripple { display: none !important; }
@@ -72,21 +75,21 @@ a { color: inherit; text-decoration: none; }
 button, a { font: inherit; cursor: pointer; }
 
 @media (min-width: 760px) {
-  body { background-image:
-    linear-gradient(145deg, rgba(3, 5, 11, 0.64), rgba(8, 12, 24, 0.84)),
-    url('./data/background/bg-1440.jpg'); }
+  body { --background-shade: linear-gradient(145deg, rgba(3,5,11,.64), rgba(8,12,24,.84)); background-image:
+    var(--background-shade),
+    var(--background-current, url('./data/background/bg-1440.jpg')); }
   body::before { background-image:
-    linear-gradient(145deg, rgba(3, 5, 11, 0.64), rgba(8, 12, 24, 0.84)),
-    url('./data/background/bg-1440.jpg'); }
+    var(--background-shade),
+    var(--background-current, url('./data/background/bg-1440.jpg')); }
 }
 
 @media (min-width: 1440px) {
-  body { background-image:
-    linear-gradient(145deg, rgba(3, 5, 11, 0.62), rgba(8, 12, 24, 0.82)),
-    url('./data/background/bg-1920.jpg'); }
+  body { --background-shade: linear-gradient(145deg, rgba(3,5,11,.62), rgba(8,12,24,.82)); background-image:
+    var(--background-shade),
+    var(--background-current, url('./data/background/bg-1920.jpg')); }
   body::before { background-image:
-    linear-gradient(145deg, rgba(3, 5, 11, 0.62), rgba(8, 12, 24, 0.82)),
-    url('./data/background/bg-1920.jpg'); }
+    var(--background-shade),
+    var(--background-current, url('./data/background/bg-1920.jpg')); }
 }
 
 .ambient { display: none; }
@@ -553,8 +556,9 @@ body.mobile-panel-open {
     height: min(calc(636px + var(--music-height) + var(--music-gap)), calc(100dvh - 28px));
     --music-gap: 12px;
   }
-  .profile-layout, .profile-layout:has(.profile-console.collapsed) { width: min(410px, 94vw); max-width: min(410px, 94vw); }
-  #profile-screen.active { overflow-y: auto !important; align-items: safe center; }
+  .profile-layout, .profile-layout:has(.profile-console.collapsed) { width: min(410px, 94vw); max-width: min(410px, 94vw); max-height: 100%; min-height: 0; }
+  .profile-layout > .profile-stack { flex-shrink: 1; }
+  #profile-screen.active { overflow: clip !important; align-items: center; }
   #profile-screen .profile-stack > .profile-console {
     width: 100% !important;
     max-width: 100% !important;
